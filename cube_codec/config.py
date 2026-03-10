@@ -28,6 +28,7 @@ class CodecConfig:
     literal_token_overhead_bits: int = 1
     debug: bool = False
     random_seed: int = 0
+    competition_target: str = "zlib"
 
     @classmethod
     def from_dict(cls, data: dict) -> "CodecConfig":
@@ -63,6 +64,7 @@ class CodecConfig:
             "literal_token_overhead_bits": self.literal_token_overhead_bits,
             "debug": self.debug,
             "random_seed": self.random_seed,
+            "competition_target": self.competition_target,
         }
 
     def validate(self) -> None:
@@ -102,6 +104,8 @@ class CodecConfig:
                     raise ValueError("phrase_lengths must contain positive integers")
             if self.prefix_index_bits > min(self.phrase_lengths):
                 raise ValueError("prefix_index_bits must be <= min(phrase_lengths) in variable mode")
+        if self.competition_target not in {"zlib", "lzma", "flat_dictionary"}:
+            raise ValueError("competition_target must be one of: zlib, lzma, flat_dictionary")
 
 
 def save_config(path: str | Path, config: CodecConfig) -> None:

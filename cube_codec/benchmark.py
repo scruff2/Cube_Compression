@@ -426,7 +426,15 @@ def run_benchmark(config: CodecConfig, train_files: list[str], test_files: list[
     else:
         long_phrase_reco = "insufficient evidence, rerun on stronger corpus"
 
-    scaling_any_real = bool(real_candidates and best_real_bits < family_bits)
+    target_key = config.competition_target
+    target_bits = {
+        "zlib": float(zlib_bits),
+        "lzma": float(lzma_bits),
+        "flat_dictionary": float(flat_bits),
+    }[target_key]
+    target_any_real = bool(real_candidates and best_real_bits < target_bits)
+
+    scaling_any_real = target_any_real
     region_used_fraction = len(region_support_sizes) / max(1, len(cube.regions))
     if scaling_any_real:
         scaling_verdict = "scaling_promising"
@@ -515,7 +523,12 @@ def run_benchmark(config: CodecConfig, train_files: list[str], test_files: list[
             "scaling_best_real_cube_mode": best_real_name,
             "scaling_best_real_cube_bits": best_real_bits if math.isfinite(best_real_bits) else None,
             "scaling_best_real_cube_minus_family_aware_bits": (best_real_bits - family_bits if math.isfinite(best_real_bits) else None),
-            "scaling_any_real_cube_beats_family_aware": scaling_any_real,
+            "scaling_any_real_cube_beats_family_aware": bool(real_candidates and best_real_bits < family_bits),
+            "target_baseline": target_key,
+            "target_baseline_bits": target_bits,
+            "best_real_cube_minus_target_bits": (best_real_bits - target_bits if math.isfinite(best_real_bits) else None),
+            "any_real_cube_beats_target": target_any_real,
+            "scaling_any_real_cube_beats_target": target_any_real,
             "scaling_average_route_emitted_bits": (sum(route_lengths) / max(1, len(route_lengths))),
             "scaling_verdict": scaling_verdict,
             "scaling_recommendation": scaling_reco,
@@ -734,10 +747,12 @@ def markdown_report(metrics: dict, diagnostics: dict | None = None) -> str:
         f"- phrase_family_oracle ratio: {metrics['baselines']['phrase_family_oracle']['estimated_ratio']:.4f}",
         "",
         "## Decision",
-        f"- cube_fixed_length_actual beats family_aware: {metrics['real_descriptor_coding_modes'].get(MODE_FIXED, {}).get('compressed_bits', float('inf')) < metrics['baselines']['family_aware']['compressed_bits'] if metrics['real_descriptor_coding_modes'].get(MODE_FIXED, {}).get('implemented') else False}",
-        f"- cube_family_local_id_actual beats family_aware: {metrics['real_descriptor_coding_modes'].get(MODE_LOCAL, {}).get('compressed_bits', float('inf')) < metrics['baselines']['family_aware']['compressed_bits'] if metrics['real_descriptor_coding_modes'].get(MODE_LOCAL, {}).get('implemented') else False}",
-        f"- cube_entropy_coded_actual beats family_aware: {metrics['real_descriptor_coding_modes'].get(MODE_ENTROPY, {}).get('compressed_bits', float('inf')) < metrics['baselines']['family_aware']['compressed_bits'] if metrics['real_descriptor_coding_modes'].get(MODE_ENTROPY, {}).get('implemented') else False}",
+        f"- target baseline: {metrics['decision']['target_baseline']} ({metrics['decision']['target_baseline_bits']} bits)",
+        f"- cube_fixed_length_actual beats target: {metrics['real_descriptor_coding_modes'].get(MODE_FIXED, {}).get('compressed_bits', float('inf')) < metrics['decision']['target_baseline_bits'] if metrics['real_descriptor_coding_modes'].get(MODE_FIXED, {}).get('implemented') else False}",
+        f"- cube_family_local_id_actual beats target: {metrics['real_descriptor_coding_modes'].get(MODE_LOCAL, {}).get('compressed_bits', float('inf')) < metrics['decision']['target_baseline_bits'] if metrics['real_descriptor_coding_modes'].get(MODE_LOCAL, {}).get('implemented') else False}",
+        f"- cube_entropy_coded_actual beats target: {metrics['real_descriptor_coding_modes'].get(MODE_ENTROPY, {}).get('compressed_bits', float('inf')) < metrics['decision']['target_baseline_bits'] if metrics['real_descriptor_coding_modes'].get(MODE_ENTROPY, {}).get('implemented') else False}",
         f"- best real cube mode: {metrics['decision']['best_real_cube_mode']}",
+        f"- best_real_cube_minus_target_bits: {metrics['decision']['best_real_cube_minus_target_bits']}",
         f"- descriptor_redesign_verdict: {metrics['decision']['descriptor_redesign_verdict']}",
         f"- beats family-aware in any mode: {metrics['decision']['beats_family_aware_in_any_mode']}",
         f"- best cube mode: {metrics['decision']['best_cube_mode']}",
@@ -745,7 +760,7 @@ def markdown_report(metrics: dict, diagnostics: dict | None = None) -> str:
         f"- long_phrase_any_real_cube_beats_family_aware: {metrics['decision']['long_phrase_any_real_cube_beats_family_aware']}",
         f"- long_phrase_best_length_class: {metrics['decision']['long_phrase_best_length_class']}",
         f"- long_phrase_verdict: {metrics['decision']['long_phrase_verdict']}",
-        f"- scaling_any_real_cube_beats_family_aware: {metrics['decision']['scaling_any_real_cube_beats_family_aware']}",
+        f"- scaling_any_real_cube_beats_target: {metrics['decision']['scaling_any_real_cube_beats_target']}",
         f"- scaling_verdict: {metrics['decision']['scaling_verdict']}",
         "",
         "## Recommendation",

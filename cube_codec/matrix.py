@@ -87,7 +87,7 @@ def run_benchmark_matrix(
         family_aware_bits = result.metrics["baselines"]["family_aware"]["compressed_bits"]
         if result.metrics["decision"]["beats_family_aware_in_any_mode"]:
             winning_runs.append(run_name)
-        best_real_delta = result.metrics["decision"]["best_real_cube_minus_family_aware_bits"]
+        best_real_delta = result.metrics["decision"]["best_real_cube_minus_target_bits"]
         if best_real_delta is not None and best_real_delta < 0:
             real_winning_runs.append(run_name)
         elif result.metrics["decision"]["beats_family_aware_in_any_mode"]:
@@ -128,6 +128,7 @@ def run_benchmark_matrix(
             "descriptor_redesign_verdict": result.metrics["decision"]["descriptor_redesign_verdict"],
             "long_phrase_verdict": result.metrics["decision"].get("long_phrase_verdict"),
             "scaling_verdict": result.metrics["decision"].get("scaling_verdict"),
+            "target_baseline": result.metrics["decision"].get("target_baseline"),
             "decode_ok": result.metrics["quality"]["decode_success"],
         }
         rows.append(row)
@@ -158,7 +159,7 @@ def run_benchmark_matrix(
         md_lines.append("- none")
 
     md_lines.append("")
-    md_lines.append("## Runs Where Any Real Cube Mode Beats Family-Aware")
+    md_lines.append("## Runs Where Any Real Cube Mode Beats Target Baseline")
     if real_winning_runs:
         for run in real_winning_runs:
             md_lines.append(f"- {run}")
