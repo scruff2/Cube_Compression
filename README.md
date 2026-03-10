@@ -153,6 +153,25 @@ flowchart LR
 - `scaling_cube_payload_bits`: `41152`
 - `scaling_verdict`: `scaling_not_helping`
 
+## Expected Compression Ratio (Current Prototype)
+
+For the current v1.5 scaling snapshot (`v1_5_metrics.json`, variable-length regime), expected compression ratios are:
+
+| Technique | Ratio (higher is better) | Notes |
+|---|---:|---|
+| Flat dictionary baseline | `18.2857` | Best in this run |
+| Family-aware baseline | `13.0612` | Primary target baseline |
+| Cube real mode: `cube_family_local_id_actual` | `10.3226` | Best real cube mode in this run |
+| Cube real mode: `cube_fixed_length_actual` | `8.4211` | Improved vs legacy, still below family-aware |
+| Cube real mode: `cube_actual_legacy` | `6.1538` | Legacy descriptor format |
+| zlib | `1.3445` | General-purpose reference |
+| lzma | `1.0667` | General-purpose reference |
+
+Interpretation:
+- In this structured synthetic run, dictionary-style baselines outperform current real cube streams.
+- The expected practical range for **real cube modes** in similar runs is currently around `6x` to `10x`, while family-aware/flat are often higher.
+- This is why the current scaling decision remains `scaling_not_helping` for the cube approach in its present implementation.
+
 ## Charts
 
 ### Real Mode Compressed Size (bits)
