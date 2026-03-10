@@ -1,0 +1,6 @@
+{
+  "config": "sample_config_scaling_fixed_128.json",
+  "train": "v1_4_fixed128/train.bin",
+  "test": "v1_4_fixed128/test.bin",
+  "output": "reports/preset_fixed128_metrics.json"
+}
