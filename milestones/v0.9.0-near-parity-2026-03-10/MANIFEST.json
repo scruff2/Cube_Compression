@@ -1,0 +1,12 @@
+{
+  "tag": "v0.9.0-near-parity-2026-03-10",
+  "source_commit": "04d96bc",
+  "files": [
+    "reports/zip_competition_results.md",
+    "reports/perf_baseline.md",
+    "reports/preset_structured_synth_metrics.json",
+    "reports/preset_semi_structured_narrow_metrics.json",
+    "reports/preset_mixed_general_metrics.json",
+    "FINAL_MILE_PLAN.md"
+  ]
+}
