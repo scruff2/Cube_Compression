@@ -1,0 +1,24 @@
+{
+  "mode": "family-mixture",
+  "phrase_mode": "variable",
+  "phrase_length": 256,
+  "phrase_lengths": [
+    64,
+    128,
+    192,
+    256
+  ],
+  "num_families": 4,
+  "num_variants": 4,
+  "family_frequencies": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "train_phrases": 64,
+  "test_phrases": 16,
+  "seed": 17,
+  "train_file": "v1_4_variable\\train.bin",
+  "test_file": "v1_4_variable\\test.bin"
+}

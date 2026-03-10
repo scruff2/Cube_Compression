@@ -1,0 +1,22 @@
+__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+
+artifacts*/
+v1_*_matrix/
+v1_*_corpus/
+*.bin
+*.debug.json
+metrics.json
+metrics.md
+diagnostics.json
+diagnostics.md
+v1_*_metrics.json
+v1_*_metrics.md
+v1_*_diagnostics.json
+v1_*_diagnostics.md
+
+.venv/
+Session ID.txt

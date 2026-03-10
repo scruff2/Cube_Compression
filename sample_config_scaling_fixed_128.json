@@ -1,0 +1,20 @@
+{
+  "phrase_mode": "fixed",
+  "phrase_length": 128,
+  "stride": 32,
+  "overlap_strategy": "rolling",
+  "max_training_bytes": 500000,
+  "train_sampling_seed": 123,
+  "min_frequency": 2,
+  "max_extracted_phrases": 500000,
+  "max_selected_phrases": 50000,
+  "max_regions": 1024,
+  "max_middle_variants": 32,
+  "max_suffix_variants": 32,
+  "prefix_index_bits": 16,
+  "literal_block_bits": 8,
+  "route_token_overhead_bits": 1,
+  "literal_token_overhead_bits": 1,
+  "debug": false,
+  "random_seed": 123
+}

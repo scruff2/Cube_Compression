@@ -1,0 +1,5 @@
+{
+  "stride": [64],
+  "max_regions": [8, 16],
+  "literal_block_bits": [8]
+}

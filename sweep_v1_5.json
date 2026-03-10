@@ -1,0 +1,10 @@
+{
+  "max_training_bytes": [2000, 5000],
+  "phrase_mode": ["variable"],
+  "phrase_length": [256],
+  "phrase_lengths": [[64,128,192,256]],
+  "stride": [32],
+  "max_regions": [128, 256],
+  "max_middle_variants": [8],
+  "max_suffix_variants": [8]
+}

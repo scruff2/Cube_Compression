@@ -1,0 +1,8 @@
+{
+  "phrase_mode": ["fixed", "variable"],
+  "phrase_length": [128],
+  "phrase_lengths": [[64,128,192,256]],
+  "stride": [32],
+  "max_regions": [64],
+  "literal_block_bits": [8]
+}

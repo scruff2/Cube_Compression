@@ -1,0 +1,19 @@
+{
+  "phrase_mode": "variable",
+  "phrase_length": 256,
+  "phrase_lengths": [64, 128, 192, 256],
+  "stride": 32,
+  "overlap_strategy": "overlap",
+  "min_frequency": 2,
+  "max_extracted_phrases": 800000,
+  "max_selected_phrases": 4096,
+  "max_regions": 256,
+  "max_middle_variants": 8,
+  "max_suffix_variants": 8,
+  "prefix_index_bits": 16,
+  "literal_block_bits": 8,
+  "route_token_overhead_bits": 1,
+  "literal_token_overhead_bits": 1,
+  "debug": false,
+  "random_seed": 0
+}

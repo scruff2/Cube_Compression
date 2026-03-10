@@ -1,0 +1,21 @@
+{
+  "mode": "prefix-variant",
+  "phrase_mode": "fixed",
+  "phrase_length": 128,
+  "phrase_lengths": [
+    128
+  ],
+  "num_families": 4,
+  "num_variants": 4,
+  "family_frequencies": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "train_phrases": 64,
+  "test_phrases": 16,
+  "seed": 13,
+  "train_file": "v1_4_fixed128\\train.bin",
+  "test_file": "v1_4_fixed128\\test.bin"
+}
