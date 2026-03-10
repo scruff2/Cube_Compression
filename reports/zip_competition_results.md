@@ -1,4 +1,4 @@
-﻿# ZIP-Class Competition Results (Phase 6 Snapshot)
+# ZIP-Class Competition Results (Phase 6 Snapshot)
 
 Date: 2026-03-10
 Target baseline: `zlib`
@@ -42,9 +42,9 @@ Interpretation:
 
 | Corpus family | Encode MB/s | Decode MB/s | Peak memory (MB) |
 |---|---:|---:|---:|
-| structured_synthetic | 9.755 | 11.814 | 0.49 |
-| semi_structured_narrow | 10.430 | 9.457 | 38.05 |
-| mixed_general | 7.223 | 7.354 | 21.07 |
+| structured_synthetic | 12.564 | 14.903 | 0.49 |
+| semi_structured_narrow | 10.804 | 9.221 | 38.05 |
+| mixed_general | 10.128 | 9.204 | 21.07 |
 
 ## Charts
 
@@ -70,9 +70,9 @@ xychart-beta
 xychart-beta
     title "Best Real Mode Throughput by Corpus"
     x-axis [synthetic, semi_structured, mixed_general]
-    y-axis "MB/s" 0 --> 13
-    bar [9.755, 10.430, 7.223]
-    bar [11.814, 9.457, 7.354]
+    y-axis "MB/s" 0 --> 20
+    bar [12.564, 10.804, 10.128]
+    bar [14.903, 9.221, 9.204]
 ```
 
 ## Gate C Decision (ZIP-class positioning)

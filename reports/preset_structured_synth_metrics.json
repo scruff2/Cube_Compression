@@ -97,11 +97,11 @@
     "cube_size_bytes": 5144,
     "metadata_size_bytes": 182,
     "total_shared_artifact_size_bytes": 5326,
-    "train_wall_time_sec": 0.001832200214266777
+    "train_wall_time_sec": 0.0018520001322031021
   },
   "runtime": {
-    "encode_wall_time_sec": 0.0035990001633763313,
-    "decode_wall_time_sec": 1.9200146198272705e-05
+    "encode_wall_time_sec": 0.003790599759668112,
+    "decode_wall_time_sec": 1.9799917936325073e-05
   },
   "quality": {
     "decode_success": true,

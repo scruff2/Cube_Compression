@@ -74,3 +74,9 @@
 - Added ZIP competition report with charts:
   - `reports/zip_competition_results.md`
 - Gate C result: fail for ZIP-class positioning (wins are synthetic-only; broader corpora lose to zlib/lzma).
+
+### Execution plan closure
+- Added and completed `EXECUTION_PLAN.md`.
+- Re-ran debug-first small E2E validation with exact decode match.
+- Regenerated preset benchmark suite and perf suite artifacts.
+- Validation gate: `pytest -q` -> `26 passed`.

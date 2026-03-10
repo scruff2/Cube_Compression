@@ -1,0 +1,14 @@
+{
+  "phrase_length": 64,
+  "stride": 64,
+  "min_frequency": 2,
+  "max_regions": 64,
+  "max_middle_variants": 8,
+  "max_suffix_variants": 4,
+  "prefix_index_bits": 16,
+  "literal_block_bits": 8,
+  "route_token_overhead_bits": 1,
+  "literal_token_overhead_bits": 1,
+  "debug": true,
+  "random_seed": 0
+}
