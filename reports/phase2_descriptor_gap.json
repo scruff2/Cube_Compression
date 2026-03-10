@@ -1,0 +1,23 @@
+{
+    "gate_a":  "fail",
+    "rows":  [
+                 {
+                     "run":  "fixed128",
+                     "fixed_gap_bits":  232,
+                     "local_gap_bits":  331,
+                     "entropy_gap_bits":  904,
+                     "best_real_minus_family":  171,
+                     "descriptor_redesign_verdict":  "descriptor_redesign_fails",
+                     "family_bits":  309
+                 },
+                 {
+                     "run":  "variable_scaling",
+                     "fixed_gap_bits":  108,
+                     "local_gap_bits":  178,
+                     "entropy_gap_bits":  1144.7,
+                     "best_real_minus_family":  52,
+                     "descriptor_redesign_verdict":  "descriptor_redesign_fails",
+                     "family_bits":  196
+                 }
+             ]
+}

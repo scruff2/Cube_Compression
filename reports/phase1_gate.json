@@ -1,0 +1,11 @@
+{
+  "status": "pass_with_limitations",
+  "limitation": "No larger real narrow-domain corpus provided yet",
+  "artifacts": [
+    "docs/corpus_manifest.json",
+    "configs/presets/fixed128.json",
+    "configs/presets/variable_scaling.json",
+    "reports/preset_fixed128_metrics.json",
+    "reports/preset_variable_metrics.json"
+  ]
+}

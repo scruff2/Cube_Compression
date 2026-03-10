@@ -1,0 +1,37 @@
+{
+  "version": "phase1_locked_v1",
+  "generated_at": "2026-03-09",
+  "corpora": [
+    {
+      "id": "synthetic_fixed128_prefix_variant",
+      "family": "structured_synthetic",
+      "train_file": "v1_4_fixed128/train.bin",
+      "test_file": "v1_4_fixed128/test.bin",
+      "split": "locked",
+      "seed": 13,
+      "regime": "fixed_128"
+    },
+    {
+      "id": "synthetic_variable_family_mixture",
+      "family": "structured_synthetic",
+      "train_file": "v1_4_variable/train.bin",
+      "test_file": "v1_4_variable/test.bin",
+      "split": "locked",
+      "seed": 17,
+      "regime": "variable_64_128_192_256"
+    },
+    {
+      "id": "synthetic_test_small",
+      "family": "structured_synthetic",
+      "train_file": "train_small.bin",
+      "test_file": "test_small.bin",
+      "split": "locked",
+      "seed": 0,
+      "regime": "fixed_64"
+    }
+  ],
+  "notes": [
+    "No large real narrow-domain corpus has been provided yet.",
+    "Phase 1 completeness for real-corpus coverage is pending external data."
+  ]
+}
