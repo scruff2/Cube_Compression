@@ -15,13 +15,10 @@
 - Gate result: `pass_with_limitations` (real large narrow-domain corpus not yet available)
 
 ### Phase 2 status
-- Generated descriptor estimate-vs-actual gap analysis:
-  - `reports/phase2_descriptor_gap.md`
-  - `reports/phase2_descriptor_gap.json`
+- Generated descriptor estimate-vs-actual gap analysis.
 - Implemented bounded descriptor refinements:
   - route-only packing for fixed/local/entropy streams
   - canonical Huffman table serialization for entropy mode
-- Re-ran presets and recomputed gap report.
 - Descriptor conclusion: estimate-vs-actual gap remains materially large.
 
 ### Target shift
@@ -31,11 +28,17 @@
 ### Phase 3 status (ZIP-target framing)
 - Re-ran scaling matrix batch: `reports/phase3_matrix/`
 - Gate B result: `pass` (real-mode wins vs target baseline are repeatable in this batch)
-- Updated memos:
-  - `reports/phase3_gate.md`
-  - `reports/roadmap_recommendation.md`
+
+### Phase 4/5 engineering status (in progress)
+- Added performance harness: `cube_codec/perf.py`
+- Added CLI command: `python -m cube_codec.cli perf ...`
+- Added robustness tests for corrupt stream handling.
+- Generated baseline perf artifact:
+  - `reports/perf_baseline.json`
+  - `reports/perf_baseline.md`
+- Validation update: `pytest -q` -> `26 passed`
 
 ### Next actions
-1. Add speed/memory benchmark harness and baseline comparisons.
-2. Add format robustness checks and corruption behavior tests.
-3. Expand corpus pack beyond current synthetic-heavy set.
+1. Add corruption-behavior notes to docs and format spec draft.
+2. Expand perf runs across additional presets and summarize in `reports/perf_baseline.md`.
+3. Build broader corpus pack manifest for stronger ZIP-target external validity.

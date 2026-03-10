@@ -63,6 +63,9 @@ class BitReader:
         self.pos += width
         return out
 
+    def eof(self) -> bool:
+        return self.pos >= len(self.bits)
+
 
 def _bit_width(n: int) -> int:
     if n <= 1:
@@ -345,6 +348,8 @@ def _decode_entropy(payload: bytes, token_count: int, original_bit_length: int, 
                 continue
         code = ""
         while code not in code_to_sym:
+            if reader.eof():
+                raise ValueError("corrupt entropy payload")
             code += str(reader.read_bits(1))
         r, m, s = code_to_sym[code]
         tokens.append(RouteToken(token_type="R", region_id=r, middle_id=m, suffix_id=s, emit_length=None))
@@ -389,6 +394,8 @@ def decode_mode_stream(data: bytes, cube: CubeModel) -> tuple[EncodedStream, str
     off = 4
     mode_id, original_bits, token_count, flags = struct.unpack_from("<BIIB", mv, off)
     off += 10
+    if mode_id not in ID_TO_MODE:
+        raise ValueError(f"unsupported mode id: {mode_id}")
     mode = ID_TO_MODE[mode_id]
     payload = bytes(mv[off:])
     route_only = bool(flags & FLAG_ROUTE_ONLY)

@@ -12,6 +12,7 @@ from .cube_io import save_cube
 from .decoder import decode_stream
 from .encoder import encode_bits
 from .matrix import run_benchmark_matrix
+from .perf import run_perf, write_perf_report
 from .route_index import build_prefix_index
 from .route_model import load_binary_stream, save_binary_stream, save_debug_stream
 from .stream_codecs import (
@@ -109,6 +110,13 @@ def cmd_benchmark_matrix(args: argparse.Namespace) -> None:
     print(json.dumps(result, indent=2))
 
 
+def cmd_perf(args: argparse.Namespace) -> None:
+    config = _load_config(args.config)
+    result = run_perf(config, args.train, args.test, repeats=args.repeats)
+    write_perf_report(args.output, result)
+    print(json.dumps(result, indent=2))
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Shared 3D cube route-descriptor prototype codec")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -168,6 +176,14 @@ def build_parser() -> argparse.ArgumentParser:
     p_matrix.add_argument("--sweep", required=True)
     p_matrix.add_argument("--output-dir", required=True)
     p_matrix.set_defaults(func=cmd_benchmark_matrix)
+
+    p_perf = sub.add_parser("perf")
+    p_perf.add_argument("--config", required=True)
+    p_perf.add_argument("--train", required=True)
+    p_perf.add_argument("--test", required=True)
+    p_perf.add_argument("--output", required=True)
+    p_perf.add_argument("--repeats", type=int, default=3)
+    p_perf.set_defaults(func=cmd_perf)
 
     return parser
 

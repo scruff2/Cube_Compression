@@ -32,6 +32,17 @@ python -m cube_codec.cli benchmark-matrix \
   --output-dir v1_5_matrix
 ```
 
+Run performance baseline:
+
+```bash
+python -m cube_codec.cli perf \
+  --config sample_config_scaling_variable.json \
+  --train v1_4_variable/train.bin \
+  --test v1_4_variable/test.bin \
+  --output reports/perf_baseline.json \
+  --repeats 3
+```
+
 ## Mathematical Approach
 
 ### Region/Route model
