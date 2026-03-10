@@ -7,7 +7,25 @@ Custom real-mode streams use a header with:
 - mode id
 - original bit length
 - token count
-- flags (including route-only optimization)
+- flags:
+  - `FLAG_ROUTE_ONLY` (`1`)
+  - `FLAG_LITERAL_ZLIB` (`2`)
+  - `FLAG_FRAMED_PAYLOAD` (`4`)
+
+## Framed payloads (fixed/local/entropy modes)
+
+For non-legacy real modes, payloads are framed as:
+
+- `uint32 token_payload_len`
+- `uint32 literal_blob_len`
+- `token_payload` bytes
+- optional `literal_blob`
+
+`literal_blob` (when present):
+- `uint32 literal_bit_length`
+- `zlib`-compressed literal bit bytes
+
+Literal bits are consumed in token order using per-token literal lengths.
 
 ## Corruption behavior
 
@@ -15,6 +33,7 @@ Current behavior:
 - wrong magic => explicit `ValueError`
 - unsupported mode id => explicit `ValueError`
 - truncated/corrupt entropy payload => explicit decode failure
+- corrupt framed/literal payload sizes or zlib data => explicit decode failure
 
 ## Safety goals
 
@@ -26,3 +45,4 @@ Current behavior:
 
 - `test_decode_rejects_bad_magic`
 - `test_decode_rejects_corrupt_entropy_payload`
+- `test_decode_rejects_corrupt_literal_payload`

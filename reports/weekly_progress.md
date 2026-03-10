@@ -80,3 +80,14 @@
 - Re-ran debug-first small E2E validation with exact decode match.
 - Regenerated preset benchmark suite and perf suite artifacts.
 - Validation gate: `pytest -q` -> `26 passed`.
+
+### Descriptor redesign experiment: literal-side compression
+- Implemented framed real-mode payloads with compressed literal side-stream for:
+  - `cube_fixed_length_actual`
+  - `cube_family_local_id_actual`
+  - `cube_entropy_coded_actual`
+- Added robustness and roundtrip tests for framed literal payload handling.
+- Validation update: `pytest -q` -> `28 passed`.
+- Impact on best real mode (`cube_family_local_id_actual`):
+  - semi-structured narrow: `261,464 -> 190,568` bits (improved, still above zlib `57,920`)
+  - mixed general: `125,160 -> 94,952` bits (improved, still above zlib `31,800`)

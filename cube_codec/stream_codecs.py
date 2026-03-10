@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import heapq
 import struct
+import zlib
 from collections import Counter
 
 from .cube_model import CubeModel, reconstruct_route
@@ -9,6 +10,8 @@ from .route_model import EncodedStream, LiteralToken, RouteToken
 
 MAGIC = b"CCM2"
 FLAG_ROUTE_ONLY = 1
+FLAG_LITERAL_ZLIB = 2
+FLAG_FRAMED_PAYLOAD = 4
 
 MODE_LEGACY = "cube_actual_legacy"
 MODE_FIXED = "cube_fixed_length_actual"
@@ -197,23 +200,28 @@ def _encode_fixed(stream: EncodedStream, cube: CubeModel) -> tuple[bytes, Encode
     fixed_stream = _full_route_stream(stream, cube)
     route_only = all(isinstance(t, RouteToken) for t in fixed_stream.tokens)
     writer = BitWriter()
+    literal_writer = BitWriter()
     r_bits, m_bits, s_bits = _route_widths(cube)
+    literal_count = 0
     for token in fixed_stream.tokens:
         if isinstance(token, LiteralToken):
             writer.write_bits(0, 1)
             writer.write_bits(token.bit_length, 8)
-            writer.write_bitstring(token.payload_bits[: token.bit_length])
+            literal_writer.write_bitstring(token.payload_bits[: token.bit_length])
+            literal_count += 1
         else:
             if not route_only:
                 writer.write_bits(1, 1)
             writer.write_bits(token.region_id, r_bits)
             writer.write_bits(token.middle_id, m_bits)
             writer.write_bits(token.suffix_id, s_bits)
-    return writer.to_bytes(), fixed_stream, route_only
+    payload = _build_framed_payload(writer.to_bytes(), literal_writer, literal_count)
+    return payload, fixed_stream, route_only
 
 
-def _decode_fixed(payload: bytes, token_count: int, original_bit_length: int, cube: CubeModel, route_only: bool) -> EncodedStream:
-    reader = BitReader(payload)
+def _decode_fixed(payload: bytes, token_count: int, original_bit_length: int, cube: CubeModel, route_only: bool, flags: int) -> EncodedStream:
+    token_payload, literal_source = _decode_framed_payload(payload, flags)
+    reader = BitReader(token_payload)
     r_bits, m_bits, s_bits = _route_widths(cube)
     tokens = []
     for _ in range(token_count):
@@ -223,10 +231,12 @@ def _decode_fixed(payload: bytes, token_count: int, original_bit_length: int, cu
         t = reader.read_bits(1)
         if t == 0:
             n = reader.read_bits(8)
-            bits = reader.read_bitstring(n)
+            bits = literal_source.read(n) if literal_source is not None else reader.read_bitstring(n)
             tokens.append(LiteralToken(token_type="L", bit_length=n, payload_bits=bits))
         else:
             tokens.append(RouteToken(token_type="R", region_id=reader.read_bits(r_bits), middle_id=reader.read_bits(m_bits), suffix_id=reader.read_bits(s_bits), emit_length=None))
+    if literal_source is not None:
+        literal_source.ensure_exhausted()
     return EncodedStream(tokens=tokens, original_bit_length=original_bit_length)
 
 
@@ -234,30 +244,36 @@ def _encode_local(stream: EncodedStream, cube: CubeModel) -> tuple[bytes, Encode
     local_stream = _full_route_stream(stream, cube)
     route_only = all(isinstance(t, RouteToken) for t in local_stream.tokens)
     writer = BitWriter()
+    literal_writer = BitWriter()
     r_bits, _, _ = _route_widths(cube)
     forward, _, widths = _local_maps(cube)
+    literal_count = 0
     for token in local_stream.tokens:
         if isinstance(token, LiteralToken):
             writer.write_bits(0, 1)
             writer.write_bits(token.bit_length, 8)
-            writer.write_bitstring(token.payload_bits[: token.bit_length])
+            literal_writer.write_bitstring(token.payload_bits[: token.bit_length])
+            literal_count += 1
         else:
             if not route_only:
                 writer.write_bits(1, 1)
             writer.write_bits(token.region_id, r_bits)
             local_id = forward[token.region_id][(token.middle_id, token.suffix_id)]
             writer.write_bits(local_id, widths[token.region_id])
+    payload = _build_framed_payload(writer.to_bytes(), literal_writer, literal_count)
     diagnostics = {
         "region_id_width": r_bits,
         "local_route_table_size_per_region": {str(k): len(v) for k, v in forward.items()},
         "max_local_id_width": max(widths.values()) if widths else 0,
         "avg_local_id_width": (sum(widths.values()) / max(1, len(widths))),
+        "literal_count": literal_count,
     }
-    return writer.to_bytes(), local_stream, diagnostics, route_only
+    return payload, local_stream, diagnostics, route_only
 
 
-def _decode_local(payload: bytes, token_count: int, original_bit_length: int, cube: CubeModel, route_only: bool) -> EncodedStream:
-    reader = BitReader(payload)
+def _decode_local(payload: bytes, token_count: int, original_bit_length: int, cube: CubeModel, route_only: bool, flags: int) -> EncodedStream:
+    token_payload, literal_source = _decode_framed_payload(payload, flags)
+    reader = BitReader(token_payload)
     r_bits, _, _ = _route_widths(cube)
     _, reverse, widths = _local_maps(cube)
     tokens = []
@@ -271,13 +287,15 @@ def _decode_local(payload: bytes, token_count: int, original_bit_length: int, cu
         t = reader.read_bits(1)
         if t == 0:
             n = reader.read_bits(8)
-            bits = reader.read_bitstring(n)
+            bits = literal_source.read(n) if literal_source is not None else reader.read_bitstring(n)
             tokens.append(LiteralToken(token_type="L", bit_length=n, payload_bits=bits))
         else:
             region = reader.read_bits(r_bits)
             local_id = reader.read_bits(widths[region])
             mid, suf = reverse[region][local_id]
             tokens.append(RouteToken(token_type="R", region_id=region, middle_id=mid, suffix_id=suf, emit_length=None))
+    if literal_source is not None:
+        literal_source.ensure_exhausted()
     return EncodedStream(tokens=tokens, original_bit_length=original_bit_length)
 
 
@@ -290,11 +308,14 @@ def _encode_entropy(stream: EncodedStream, cube: CubeModel) -> tuple[bytes, Enco
     codes = _canonical_from_lengths(lengths)
 
     writer = BitWriter()
+    literal_writer = BitWriter()
+    literal_count = 0
     for token in entropy_stream.tokens:
         if isinstance(token, LiteralToken):
             writer.write_bits(0, 1)
             writer.write_bits(token.bit_length, 8)
-            writer.write_bitstring(token.payload_bits[: token.bit_length])
+            literal_writer.write_bitstring(token.payload_bits[: token.bit_length])
+            literal_count += 1
         else:
             if not route_only:
                 writer.write_bits(1, 1)
@@ -305,7 +326,7 @@ def _encode_entropy(stream: EncodedStream, cube: CubeModel) -> tuple[bytes, Enco
     for sym in sorted(codes):
         r, m, s = sym
         table += struct.pack("<HHHB", r, m, s, lengths[sym])
-    payload = bytes(table) + writer.to_bytes()
+    payload = bytes(table) + _build_framed_payload(writer.to_bytes(), literal_writer, literal_count)
 
     entropy = 0.0
     total = sum(route_freq.values())
@@ -319,11 +340,12 @@ def _encode_entropy(stream: EncodedStream, cube: CubeModel) -> tuple[bytes, Enco
         "symbol_alphabet_size": len(codes),
         "estimated_entropy_bits_per_route": entropy,
         "actual_coded_bits": len(payload) * 8,
+        "literal_count": literal_count,
     }
     return payload, entropy_stream, diagnostics, route_only
 
 
-def _decode_entropy(payload: bytes, token_count: int, original_bit_length: int, cube: CubeModel, route_only: bool) -> EncodedStream:
+def _decode_entropy(payload: bytes, token_count: int, original_bit_length: int, cube: CubeModel, route_only: bool, flags: int) -> EncodedStream:
     _ = cube
     mv = memoryview(payload)
     off = 0
@@ -335,15 +357,15 @@ def _decode_entropy(payload: bytes, token_count: int, original_bit_length: int, 
         off += 7
         lengths[(r, m, s)] = n
     code_to_sym = {code: sym for sym, code in _canonical_from_lengths(lengths).items()}
-
-    reader = BitReader(bytes(mv[off:]))
+    token_payload, literal_source = _decode_framed_payload(bytes(mv[off:]), flags)
+    reader = BitReader(token_payload)
     tokens = []
     for _i in range(token_count):
         if not route_only:
             t = reader.read_bits(1)
             if t == 0:
                 n = reader.read_bits(8)
-                bits = reader.read_bitstring(n)
+                bits = literal_source.read(n) if literal_source is not None else reader.read_bitstring(n)
                 tokens.append(LiteralToken(token_type="L", bit_length=n, payload_bits=bits))
                 continue
         code = ""
@@ -353,7 +375,63 @@ def _decode_entropy(payload: bytes, token_count: int, original_bit_length: int, 
             code += str(reader.read_bits(1))
         r, m, s = code_to_sym[code]
         tokens.append(RouteToken(token_type="R", region_id=r, middle_id=m, suffix_id=s, emit_length=None))
+    if literal_source is not None:
+        literal_source.ensure_exhausted()
     return EncodedStream(tokens=tokens, original_bit_length=original_bit_length)
+
+
+class _LiteralSource:
+    def __init__(self, bits: str) -> None:
+        self.bits = bits
+        self.pos = 0
+
+    def read(self, n: int) -> str:
+        out = self.bits[self.pos : self.pos + n]
+        if len(out) != n:
+            raise ValueError("corrupt literal payload")
+        self.pos += n
+        return out
+
+    def ensure_exhausted(self) -> None:
+        if self.pos != len(self.bits):
+            raise ValueError("unused literal payload bits")
+
+
+def _build_framed_payload(token_payload: bytes, literal_writer: BitWriter, literal_count: int) -> bytes:
+    literal_bits = "".join(literal_writer.bits)
+    if literal_count == 0:
+        return struct.pack("<II", len(token_payload), 0) + token_payload
+    literal_bytes = literal_writer.to_bytes()
+    literal_blob = struct.pack("<I", len(literal_bits)) + zlib.compress(literal_bytes)
+    return struct.pack("<II", len(token_payload), len(literal_blob)) + token_payload + literal_blob
+
+
+def _decode_framed_payload(payload: bytes, flags: int) -> tuple[bytes, _LiteralSource | None]:
+    if not (flags & FLAG_FRAMED_PAYLOAD):
+        return payload, None
+    mv = memoryview(payload)
+    if len(mv) < 8:
+        raise ValueError("corrupt framed payload")
+    token_len, literal_len = struct.unpack_from("<II", mv, 0)
+    if token_len + literal_len + 8 != len(mv):
+        raise ValueError("corrupt framed payload sizes")
+    off = 8
+    token_payload = bytes(mv[off : off + token_len])
+    off += token_len
+    if literal_len == 0:
+        return token_payload, None
+    literal_blob = bytes(mv[off : off + literal_len])
+    if len(literal_blob) < 4:
+        raise ValueError("corrupt literal payload")
+    bit_len = struct.unpack_from("<I", literal_blob, 0)[0]
+    try:
+        raw = zlib.decompress(literal_blob[4:])
+    except Exception as exc:
+        raise ValueError("corrupt literal payload") from exc
+    literal_bits = "".join(f"{b:08b}" for b in raw)
+    if bit_len > len(literal_bits):
+        raise ValueError("corrupt literal payload")
+    return token_payload, _LiteralSource(literal_bits[:bit_len])
 
 
 def encode_mode_stream(stream: EncodedStream, cube: CubeModel, mode: str) -> tuple[bytes, dict]:
@@ -367,16 +445,25 @@ def encode_mode_stream(stream: EncodedStream, cube: CubeModel, mode: str) -> tup
         diag = {"length_field_present": True, "route_only": False}
     elif mode == MODE_FIXED:
         payload, normalized, route_only = _encode_fixed(stream, cube)
+        flags |= FLAG_FRAMED_PAYLOAD
+        if any(isinstance(t, LiteralToken) for t in normalized.tokens):
+            flags |= FLAG_LITERAL_ZLIB
         if route_only:
             flags |= FLAG_ROUTE_ONLY
         diag = {"length_field_present": False, "route_only": route_only}
     elif mode == MODE_LOCAL:
         payload, normalized, diag, route_only = _encode_local(stream, cube)
+        flags |= FLAG_FRAMED_PAYLOAD
+        if any(isinstance(t, LiteralToken) for t in normalized.tokens):
+            flags |= FLAG_LITERAL_ZLIB
         if route_only:
             flags |= FLAG_ROUTE_ONLY
         diag = diag | {"route_only": route_only}
     else:
         payload, normalized, diag, route_only = _encode_entropy(stream, cube)
+        flags |= FLAG_FRAMED_PAYLOAD
+        if any(isinstance(t, LiteralToken) for t in normalized.tokens):
+            flags |= FLAG_LITERAL_ZLIB
         if route_only:
             flags |= FLAG_ROUTE_ONLY
         diag = diag | {"route_only": route_only}
@@ -402,7 +489,7 @@ def decode_mode_stream(data: bytes, cube: CubeModel) -> tuple[EncodedStream, str
     if mode == MODE_LEGACY:
         return _decode_legacy(payload, token_count, original_bits, cube), mode
     if mode == MODE_FIXED:
-        return _decode_fixed(payload, token_count, original_bits, cube, route_only), mode
+        return _decode_fixed(payload, token_count, original_bits, cube, route_only, flags), mode
     if mode == MODE_LOCAL:
-        return _decode_local(payload, token_count, original_bits, cube, route_only), mode
-    return _decode_entropy(payload, token_count, original_bits, cube, route_only), mode
+        return _decode_local(payload, token_count, original_bits, cube, route_only, flags), mode
+    return _decode_entropy(payload, token_count, original_bits, cube, route_only, flags), mode

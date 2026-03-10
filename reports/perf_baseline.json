@@ -2,30 +2,30 @@
   "runs": [
     {
       "corpus": "structured_synthetic",
-      "encode_mbps": 12.563791020440998,
-      "decode_mbps": 14.902780247593622,
+      "encode_mbps": 12.161519505890265,
+      "decode_mbps": 14.312345947364447,
       "peak_memory_mb": 0.48525524139404297,
       "test_bits": 2560,
       "best_mode": "cube_family_local_id_actual",
-      "compressed_bits": 240
+      "compressed_bits": 304
     },
     {
       "corpus": "semi_structured_narrow",
-      "encode_mbps": 10.804276808605605,
-      "decode_mbps": 9.221129587630948,
+      "encode_mbps": 11.990126775436236,
+      "decode_mbps": 11.239303601699346,
       "peak_memory_mb": 38.054598808288574,
       "test_bits": 204504,
       "best_mode": "cube_family_local_id_actual",
-      "compressed_bits": 261464
+      "compressed_bits": 190568
     },
     {
       "corpus": "mixed_general",
-      "encode_mbps": 10.127591935309876,
-      "decode_mbps": 9.20408778250273,
+      "encode_mbps": 10.637899132364943,
+      "decode_mbps": 9.534483880348365,
       "peak_memory_mb": 21.074520111083984,
       "test_bits": 112744,
       "best_mode": "cube_family_local_id_actual",
-      "compressed_bits": 125160
+      "compressed_bits": 94952
     }
   ]
 }

@@ -6,8 +6,9 @@ from cube_codec.decoder import decode_stream
 from cube_codec.encoder import encode_bits
 from cube_codec.region_builder import build_cube_model
 from cube_codec.route_index import build_prefix_index
+from cube_codec.route_model import LiteralToken
 from cube_codec.cost_model import build_token_cost_model
-from cube_codec.stream_codecs import MODE_ENTROPY, decode_mode_stream, encode_mode_stream
+from cube_codec.stream_codecs import MODE_ENTROPY, MODE_LOCAL, decode_mode_stream, encode_mode_stream
 
 
 def _simple_case():
@@ -39,5 +40,15 @@ def test_decode_rejects_corrupt_entropy_payload() -> None:
     cube, stream = _simple_case()
     payload, _ = encode_mode_stream(stream, cube, MODE_ENTROPY)
     bad = payload[:-2]  # truncate
+    with pytest.raises(Exception):
+        decode_mode_stream(bad, cube)
+
+
+def test_decode_rejects_corrupt_literal_payload() -> None:
+    cube, stream = _simple_case()
+    # Add a short literal tail to force literal-side payload encoding.
+    stream.tokens.append(LiteralToken(token_type="L", bit_length=4, payload_bits="1010"))
+    payload, _ = encode_mode_stream(stream, cube, MODE_LOCAL)
+    bad = payload[:-1]
     with pytest.raises(Exception):
         decode_mode_stream(bad, cube)

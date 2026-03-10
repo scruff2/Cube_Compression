@@ -16,7 +16,7 @@ For each family:
 - encode test split with all real modes
 - decode and verify exact equality
 - compare best real cube mode against zlib and lzma
-- measure runtime and memory using `perf` (5 repeats)
+- measure runtime and memory using `perf` (3 repeats)
 
 ## Correctness Outcome
 
@@ -30,21 +30,22 @@ Why successful:
 
 | Corpus family | Original bits | Best real cube bits | zlib bits | lzma bits | Cube vs zlib |
 |---|---:|---:|---:|---:|---:|
-| structured_synthetic | 2,560 | 240 | 1,904 | 2,400 | **-87.4% bits** |
-| semi_structured_narrow | 204,504 | 261,464 | 57,920 | 54,880 | **+351.4% bits** |
-| mixed_general | 112,744 | 125,160 | 31,800 | 31,264 | **+293.6% bits** |
+| structured_synthetic | 2,560 | 304 | 1,904 | 2,400 | **-84.0% bits** |
+| semi_structured_narrow | 204,504 | 190,568 | 57,920 | 54,880 | **+229.0% bits** |
+| mixed_general | 112,744 | 94,952 | 31,800 | 31,264 | **+198.6% bits** |
 
 Interpretation:
 - Success only on the synthetic niche.
-- Failure on both broader non-synthetic corpora.
+- Still behind zlib/lzma on both broader non-synthetic corpora.
+- Literal-side compression reduced the gap materially vs previous snapshot.
 
 ## Throughput and Memory (Best Real Cube Mode)
 
 | Corpus family | Encode MB/s | Decode MB/s | Peak memory (MB) |
 |---|---:|---:|---:|
-| structured_synthetic | 12.564 | 14.903 | 0.49 |
-| semi_structured_narrow | 10.804 | 9.221 | 38.05 |
-| mixed_general | 10.128 | 9.204 | 21.07 |
+| structured_synthetic | 12.162 | 14.312 | 0.49 |
+| semi_structured_narrow | 11.990 | 11.239 | 38.05 |
+| mixed_general | 10.638 | 9.534 | 21.07 |
 
 ## Charts
 
@@ -52,8 +53,8 @@ Interpretation:
 xychart-beta
     title "Best Real Mode Bits vs zlib (Lower is Better)"
     x-axis [synthetic, semi_structured, mixed_general]
-    y-axis "bits" 0 --> 280000
-    bar [240, 261464, 125160]
+    y-axis "bits" 0 --> 220000
+    bar [304, 190568, 94952]
     bar [1904, 57920, 31800]
 ```
 
@@ -62,7 +63,7 @@ xychart-beta
     title "Best Real Mode Compression Ratio vs zlib (Higher is Better)"
     x-axis [synthetic, semi_structured, mixed_general]
     y-axis "ratio" 0 --> 12
-    line [10.6667, 0.7821, 0.9008]
+    line [8.4211, 1.0731, 1.1874]
     line [1.3445, 3.5308, 3.5454]
 ```
 
@@ -70,9 +71,9 @@ xychart-beta
 xychart-beta
     title "Best Real Mode Throughput by Corpus"
     x-axis [synthetic, semi_structured, mixed_general]
-    y-axis "MB/s" 0 --> 20
-    bar [12.564, 10.804, 10.128]
-    bar [14.903, 9.221, 9.204]
+    y-axis "MB/s" 0 --> 15
+    bar [12.162, 11.990, 10.638]
+    bar [14.312, 11.239, 9.534]
 ```
 
 ## Gate C Decision (ZIP-class positioning)
@@ -81,11 +82,12 @@ Roadmap Gate C criterion:
 - beat zlib by meaningful margin on at least one meaningful data niche while staying practical on speed/memory.
 
 Current result:
-- Synthetic-only win exists, but general and semi-structured corpora are far behind zlib/lzma.
-- Therefore this snapshot does **not** support ZIP-competitive positioning.
+- Synthetic win remains strong.
+- Broader corpora still do not beat zlib/lzma.
+- Therefore this snapshot still does **not** support ZIP-competitive positioning.
 
 ## Recommendation
 
-- Do not market as ZIP competitor yet.
-- Treat current cube method as a structured-data research codec with a narrow synthetic win.
-- Next technical focus should be route-descriptor overhead collapse on non-synthetic corpora before any new ZIP claims.
+- Keep project in research mode; do not market as ZIP competitor yet.
+- Continue descriptor redesign targeting literal-heavy non-synthetic streams.
+- Re-run Gate C only after another real-mode bit-cost reduction pass.

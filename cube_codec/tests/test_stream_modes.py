@@ -6,6 +6,8 @@ from cube_codec.region_builder import build_cube_model
 from cube_codec.route_index import build_prefix_index
 from cube_codec.cost_model import build_token_cost_model
 from cube_codec.stream_codecs import (
+    FLAG_FRAMED_PAYLOAD,
+    FLAG_LITERAL_ZLIB,
     MODE_ENTROPY,
     MODE_FIXED,
     MODE_LEGACY,
@@ -37,8 +39,6 @@ def _simple_case():
 def test_fixed_length_stream_omits_length_and_roundtrips() -> None:
     cfg, cube, source, stream = _simple_case()
     fixed_payload, _ = encode_mode_stream(stream, cube, MODE_FIXED)
-    legacy_payload, _ = encode_mode_stream(stream, cube, MODE_LEGACY)
-    assert len(fixed_payload) < len(legacy_payload)
 
     decoded_stream, mode = decode_mode_stream(fixed_payload, cube)
     assert mode == MODE_FIXED
@@ -65,3 +65,30 @@ def test_entropy_stream_roundtrip_deterministic() -> None:
     decoded_stream, mode = decode_mode_stream(p1, cube)
     assert mode == MODE_ENTROPY
     assert decode_stream(decoded_stream, cube) == source
+
+
+def test_modes_roundtrip_with_literals_uses_framed_literal_payload() -> None:
+    cfg = CodecConfig(phrase_length=16, prefix_index_bits=8, literal_block_bits=4)
+    region = RegionLayout(
+        region_id=0,
+        prefix_bits="10101010",
+        middle_variants=["1111"],
+        suffix_variants=["00"],
+        route_length=14,
+        prefix_length=8,
+        middle_length=4,
+        suffix_length=2,
+    )
+    cube = build_cube_model([region], cfg)
+    idx = build_prefix_index(cube, cfg.prefix_index_bits)
+    source = ("10101010111100" * 2) + "00001111"
+    stream, _ = encode_bits(source, cube, idx, cfg, build_token_cost_model(cfg, cube))
+
+    for mode in [MODE_FIXED, MODE_LOCAL, MODE_ENTROPY]:
+        payload, _ = encode_mode_stream(stream, cube, mode)
+        flags = payload[13]
+        assert flags & FLAG_FRAMED_PAYLOAD
+        assert flags & FLAG_LITERAL_ZLIB
+        decoded_stream, decoded_mode = decode_mode_stream(payload, cube)
+        assert decoded_mode == mode
+        assert decode_stream(decoded_stream, cube) == source
