@@ -108,3 +108,11 @@
 - Latest best-real results:
   - semi-structured narrow: `58,064` vs zlib `57,920` (delta `+144` bits)
   - mixed general: `31,944` vs zlib `31,800` (delta `+144` bits)
+
+### Final-mile execution
+- Added compact literal-only container (`CCL1`) with mode-preserving metadata and varint bit-length.
+- Re-ran all validation and benchmark/perf artifacts.
+- Updated plan file: `FINAL_MILE_PLAN.md`.
+- Latest best-real results:
+  - semi-structured narrow: `57,800` vs zlib `57,920` (delta `-120` bits)
+  - mixed general: `31,792` vs zlib `31,800` (delta `-8` bits)

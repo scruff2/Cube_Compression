@@ -1,3 +1,5 @@
+import struct
+
 import pytest
 
 from cube_codec.config import CodecConfig
@@ -9,8 +11,10 @@ from cube_codec.route_index import build_prefix_index
 from cube_codec.route_model import LiteralToken
 from cube_codec.cost_model import build_token_cost_model
 from cube_codec.stream_codecs import (
+    FLAG_FRAMED_PAYLOAD,
     FLAG_LITERAL_ONLY_STREAM,
     FLAG_TOKEN_ZLIB,
+    MAGIC,
     MODE_ENTROPY,
     MODE_LOCAL,
     decode_mode_stream,
@@ -62,10 +66,13 @@ def test_decode_rejects_corrupt_literal_payload() -> None:
 
 
 def test_decode_rejects_invalid_token_zlib_flag() -> None:
-    cube, stream = _simple_case()
-    payload, _ = encode_mode_stream(stream, cube, MODE_LOCAL)
-    bad = bytearray(payload)
-    bad[13] = bad[13] | FLAG_TOKEN_ZLIB
+    cube, _ = _simple_case()
+    # Force a CCM2-shaped payload that advertises token-zlib but is not valid.
+    flags = FLAG_TOKEN_ZLIB | FLAG_FRAMED_PAYLOAD
+    bad = bytearray()
+    bad += MAGIC
+    bad += struct.pack("<BIIB", 2, 16, 1, flags)  # mode local, one token
+    bad += b"\x00"
     with pytest.raises(Exception):
         decode_mode_stream(bytes(bad), cube)
 

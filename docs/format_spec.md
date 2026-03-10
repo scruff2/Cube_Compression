@@ -13,6 +13,19 @@ Custom real-mode streams use a header with:
   - `FLAG_FRAMED_PAYLOAD` (`4`)
   - `FLAG_TOKEN_ZLIB` (`8`)
 
+## Compact literal-only container
+
+When literal-only fast path wins, stream payload may use compact container:
+
+- magic: `CCL1`
+- meta byte:
+  - low 2 bits: original mode id (`fixed`/`local`/`entropy`)
+  - next 2 bits: literal method (`raw-deflate`, `zlib`, or raw bytes)
+- varint: original bit length
+- compressed literal payload bytes
+
+Decoder reconstructs a single literal token stream with exact original bit length.
+
 ## Framed payloads (fixed/local/entropy modes)
 
 For non-legacy real modes, payloads are framed as:

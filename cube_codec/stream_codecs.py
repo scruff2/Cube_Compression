@@ -10,6 +10,7 @@ from .cube_model import CubeModel, reconstruct_route
 from .route_model import EncodedStream, LiteralToken, RouteToken
 
 MAGIC = b"CCM2"
+MAGIC_LITERAL = b"CCL1"
 FLAG_ROUTE_ONLY = 1
 FLAG_LITERAL_ZLIB = 2
 FLAG_FRAMED_PAYLOAD = 4
@@ -455,7 +456,36 @@ def _decode_framed_payload(payload: bytes, flags: int) -> tuple[bytes, _LiteralS
     return token_payload, _LiteralSource(literal_bits[:bit_len])
 
 
-def _build_literal_stream_payload(stream: EncodedStream, cube: CubeModel) -> bytes:
+def _encode_varint(n: int) -> bytes:
+    out = bytearray()
+    x = n
+    while True:
+        b = x & 0x7F
+        x >>= 7
+        if x:
+            out.append(b | 0x80)
+        else:
+            out.append(b)
+            return bytes(out)
+
+
+def _decode_varint(data: memoryview, off: int) -> tuple[int, int]:
+    shift = 0
+    value = 0
+    while True:
+        if off >= len(data):
+            raise ValueError("corrupt varint")
+        b = int(data[off])
+        off += 1
+        value |= (b & 0x7F) << shift
+        if (b & 0x80) == 0:
+            return value, off
+        shift += 7
+        if shift > 28:
+            raise ValueError("corrupt varint")
+
+
+def _build_literal_stream_payload(stream: EncodedStream, cube: CubeModel) -> tuple[bytes, int]:
     regions = {r.region_id: r for r in cube.regions}
     chunks: list[str] = []
     for token in stream.tokens:
@@ -466,25 +496,36 @@ def _build_literal_stream_payload(stream: EncodedStream, cube: CubeModel) -> byt
             emit_len = token.emit_length if token.emit_length is not None else region.route_length
             chunks.append(reconstruct_route(region, token.middle_id, token.suffix_id, emit_len))
     bits = "".join(chunks)
-    blob = zlib.compress(bits_to_bytes(bits))
-    return struct.pack("<I", len(bits)) + blob
+    raw = bits_to_bytes(bits)
+    zlib_payload = zlib.compress(raw)
+    raw_payload = raw
+    raw_co = zlib.compressobj(level=9, wbits=-15)
+    raw_deflate = raw_co.compress(raw) + raw_co.flush()
+    candidates = [(len(zlib_payload), 1, zlib_payload), (len(raw_deflate), 0, raw_deflate), (len(raw_payload), 2, raw_payload)]
+    _, method, payload = min(candidates, key=lambda t: t[0])
+    return payload, method
 
 
-def _decode_literal_stream_payload(payload: bytes, original_bit_length: int) -> EncodedStream:
-    if len(payload) < 4:
-        raise ValueError("corrupt literal-only payload")
-    bit_len = struct.unpack_from("<I", payload, 0)[0]
-    try:
-        raw = zlib.decompress(payload[4:])
-    except Exception as exc:
-        raise ValueError("corrupt literal-only payload") from exc
+def _decode_literal_stream_payload(payload: bytes, original_bit_length: int, method: int) -> EncodedStream:
+    if method == 1:
+        try:
+            raw = zlib.decompress(payload)
+        except Exception as exc:
+            raise ValueError("corrupt literal-only payload") from exc
+    elif method == 0:
+        try:
+            raw = zlib.decompress(payload, wbits=-15)
+        except Exception as exc:
+            raise ValueError("corrupt literal-only payload") from exc
+    elif method == 2:
+        raw = payload
+    else:
+        raise ValueError("unsupported literal-only method")
     bits = bytes_to_bits(raw)
-    if bit_len > len(bits):
-        raise ValueError("corrupt literal-only payload")
-    out_bits = bits[:bit_len]
-    if bit_len != original_bit_length:
+    if original_bit_length > len(bits):
         raise ValueError("corrupt literal-only payload length")
-    return EncodedStream(tokens=[LiteralToken(token_type="L", bit_length=bit_len, payload_bits=out_bits)], original_bit_length=original_bit_length)
+    out_bits = bits[:original_bit_length]
+    return EncodedStream(tokens=[LiteralToken(token_type="L", bit_length=original_bit_length, payload_bits=out_bits)], original_bit_length=original_bit_length)
 
 
 def encode_mode_stream(stream: EncodedStream, cube: CubeModel, mode: str) -> tuple[bytes, dict]:
@@ -528,13 +569,12 @@ def encode_mode_stream(stream: EncodedStream, cube: CubeModel, mode: str) -> tup
         diag = diag | {"route_only": route_only}
 
     if mode in {MODE_FIXED, MODE_LOCAL, MODE_ENTROPY}:
-        literal_only_payload = _build_literal_stream_payload(normalized, cube)
-        if len(literal_only_payload) < len(payload):
-            payload = literal_only_payload
-            flags = (flags | FLAG_LITERAL_ONLY_STREAM) & (~FLAG_ROUTE_ONLY) & (~FLAG_FRAMED_PAYLOAD) & (~FLAG_LITERAL_ZLIB) & (~FLAG_TOKEN_ZLIB)
-            diag = diag | {"literal_only_fast_path": True}
-        else:
-            diag = diag | {"literal_only_fast_path": False}
+        literal_only_payload, literal_method = _build_literal_stream_payload(normalized, cube)
+        compact_meta = (MODE_IDS[mode] & 0x03) | ((literal_method & 0x03) << 2)
+        compact = MAGIC_LITERAL + bytes([compact_meta]) + _encode_varint(normalized.original_bit_length) + literal_only_payload
+        if len(compact) < (4 + 10 + len(payload)):
+            return compact, diag | {"literal_only_fast_path": True, "literal_only_method": literal_method}
+        diag = diag | {"literal_only_fast_path": False}
 
     header = bytearray()
     header += MAGIC
@@ -544,6 +584,19 @@ def encode_mode_stream(stream: EncodedStream, cube: CubeModel, mode: str) -> tup
 
 def decode_mode_stream(data: bytes, cube: CubeModel) -> tuple[EncodedStream, str]:
     mv = memoryview(data)
+    if bytes(mv[:4]) == MAGIC_LITERAL:
+        if len(mv) < 5:
+            raise ValueError("corrupt literal-only header")
+        meta = int(mv[4])
+        mode_id = meta & 0x03
+        method = (meta >> 2) & 0x03
+        if mode_id not in ID_TO_MODE:
+            raise ValueError("unsupported literal-only mode id")
+        mode = ID_TO_MODE[mode_id]
+        original_bits, off = _decode_varint(mv, 5)
+        stream = _decode_literal_stream_payload(bytes(mv[off:]), original_bit_length=original_bits, method=method)
+        return stream, mode
+
     if bytes(mv[:4]) != MAGIC:
         raise ValueError("unsupported stream magic")
     off = 4
@@ -555,7 +608,7 @@ def decode_mode_stream(data: bytes, cube: CubeModel) -> tuple[EncodedStream, str
     payload = bytes(mv[off:])
     route_only = bool(flags & FLAG_ROUTE_ONLY)
     if flags & FLAG_LITERAL_ONLY_STREAM:
-        return _decode_literal_stream_payload(payload, original_bits), mode
+        return _decode_literal_stream_payload(payload, original_bits, method=1), mode
     if mode == MODE_LEGACY:
         return _decode_legacy(payload, token_count, original_bits, cube), mode
     if mode == MODE_FIXED:

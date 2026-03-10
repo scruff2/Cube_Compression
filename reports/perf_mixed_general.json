@@ -31,37 +31,37 @@
   "train_file": "corpora/phase1/mixed_general/train.bin",
   "test_file": "corpora/phase1/mixed_general/test.bin",
   "test_bits": 112744,
-  "base_encode_sec": 21.469665499869734,
-  "base_decode_sec": 0.0020400998182594776,
+  "base_encode_sec": 27.945228500291705,
+  "base_decode_sec": 0.002618300262838602,
   "peak_memory_bytes": 22098236,
   "mode_results": {
     "cube_actual_legacy": {
       "compressed_bits": 135552,
-      "avg_encode_sec": 0.006957166828215122,
-      "avg_decode_sec": 0.007818400083730618,
-      "encode_mbps": 16.205447243662654,
-      "decode_mbps": 14.420341603470773
+      "avg_encode_sec": 0.00831319997087121,
+      "avg_decode_sec": 0.009562033228576183,
+      "encode_mbps": 13.562045950421737,
+      "decode_mbps": 11.790797762871604
     },
     "cube_fixed_length_actual": {
-      "compressed_bits": 31944,
-      "avg_encode_sec": 0.010089699799815813,
-      "avg_decode_sec": 0.0022056330926716328,
-      "encode_mbps": 11.174167937291667,
-      "decode_mbps": 51.11638938253134
+      "compressed_bits": 31792,
+      "avg_encode_sec": 0.013231866837789616,
+      "avg_decode_sec": 0.0025752332682410875,
+      "encode_mbps": 8.520641976082182,
+      "decode_mbps": 43.78011164674235
     },
     "cube_family_local_id_actual": {
-      "compressed_bits": 31944,
-      "avg_encode_sec": 0.013205966756989559,
-      "avg_decode_sec": 0.0022256000277896724,
-      "encode_mbps": 8.537353006763224,
-      "decode_mbps": 50.65779951124926
+      "compressed_bits": 31792,
+      "avg_encode_sec": 0.016930466673026483,
+      "avg_decode_sec": 0.003324899977693955,
+      "encode_mbps": 6.659237584964097,
+      "decode_mbps": 33.908989971540635
     },
     "cube_entropy_coded_actual": {
-      "compressed_bits": 31944,
-      "avg_encode_sec": 0.00980156660079956,
-      "avg_decode_sec": 0.0023081999582548938,
-      "encode_mbps": 11.502651014053502,
-      "decode_mbps": 48.84498831948671
+      "compressed_bits": 31792,
+      "avg_encode_sec": 0.011216366663575172,
+      "avg_decode_sec": 0.0027174331868688264,
+      "encode_mbps": 10.05173987099877,
+      "decode_mbps": 41.48915253732871
     }
   }
 }

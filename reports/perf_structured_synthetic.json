@@ -31,37 +31,37 @@
   "train_file": "v1_4_variable/train.bin",
   "test_file": "v1_4_variable/test.bin",
   "test_bits": 2560,
-  "base_encode_sec": 0.011244799941778183,
-  "base_decode_sec": 3.719981759786606e-05,
+  "base_encode_sec": 0.011289900168776512,
+  "base_decode_sec": 3.589969128370285e-05,
   "peak_memory_bytes": 508827,
   "mode_results": {
     "cube_actual_legacy": {
       "compressed_bits": 424,
-      "avg_encode_sec": 5.646655336022377e-05,
-      "avg_decode_sec": 6.316648796200752e-05,
-      "encode_mbps": 45.33657267282968,
-      "decode_mbps": 40.5278191426402
+      "avg_encode_sec": 5.4899913569291435e-05,
+      "avg_decode_sec": 6.436665231982867e-05,
+      "encode_mbps": 46.63031020566032,
+      "decode_mbps": 39.77214765310035
     },
     "cube_fixed_length_actual": {
       "compressed_bits": 360,
-      "avg_encode_sec": 0.00026780009890596074,
-      "avg_decode_sec": 5.536650617917379e-05,
-      "encode_mbps": 9.559369135628872,
-      "decode_mbps": 46.23734052705946
+      "avg_encode_sec": 0.00017220014706254005,
+      "avg_decode_sec": 5.503324791789055e-05,
+      "encode_mbps": 14.866421682382496,
+      "decode_mbps": 46.51733446333229
     },
     "cube_family_local_id_actual": {
       "compressed_bits": 304,
-      "avg_encode_sec": 0.0003647666114072005,
-      "avg_decode_sec": 0.00018393310407797495,
-      "encode_mbps": 7.0181862043897185,
-      "decode_mbps": 13.918103610727607
+      "avg_encode_sec": 0.00032603337119023007,
+      "avg_decode_sec": 0.00018073323493202528,
+      "encode_mbps": 7.851956965798823,
+      "decode_mbps": 14.164522651093085
     },
     "cube_entropy_coded_actual": {
       "compressed_bits": 920,
-      "avg_encode_sec": 0.00022213347256183624,
-      "avg_decode_sec": 5.446669335166613e-05,
-      "encode_mbps": 11.52460262055896,
-      "decode_mbps": 47.00120096278416
+      "avg_encode_sec": 0.00017473334446549416,
+      "avg_decode_sec": 5.579988161722819e-05,
+      "encode_mbps": 14.650895670949293,
+      "decode_mbps": 45.8782335339149
     }
   }
 }
