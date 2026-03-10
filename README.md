@@ -90,6 +90,60 @@ flowchart LR
 - Command: `pytest -q`
 - Result: `21 passed`
 
+## Test Description and Outcomes
+
+### 1) Core correctness tests (successful)
+
+- `test_bitutils.py`, `test_cube_io.py`, `test_route_model.py`, `test_prefix_index.py`
+- What these verify:
+  - bit packing/unpacking consistency
+  - cube metadata + region serialization round-trips
+  - deterministic route reconstruction from `(region, middle, suffix)`
+  - prefix-index candidate lookup behavior
+- Why successful:
+  - these tests are deterministic and all expected invariants held, so encode/decode primitives are stable.
+
+### 2) End-to-end codec tests (successful)
+
+- `test_encoder_decoder_roundtrip.py`, `test_stream_modes.py`
+- What these verify:
+  - DP encoder + decoder round-trip exactness
+  - all real stream modes (`legacy`, `fixed`, `family_local_id`, `entropy`) decode exactly
+  - fixed/local/entropy stream outputs remain deterministic for the same inputs
+- Why successful:
+  - decoded output matched original bitstreams exactly in each mode.
+
+### 3) Baseline and benchmark pipeline tests (successful)
+
+- `test_flat_dictionary_baseline.py`, `test_benchmarks.py`, `test_matrix.py`
+- What these verify:
+  - flat dictionary baseline round-trip exactness
+  - benchmark outputs include required metrics/diagnostics/decision fields
+  - matrix summary files and required sections/columns are produced
+- Why successful:
+  - expected report artifacts were created and schema checks passed.
+
+### 4) Synthetic and long-phrase regime tests (successful)
+
+- `test_synthetic.py`, `test_v1_2_analysis.py`, `test_v1_4_long_phrase.py`
+- What these verify:
+  - synthetic corpus generation for fixed and variable phrase regimes
+  - entropy/fixed/local-id analysis sanity conditions
+  - long-phrase decision fields and length-aware diagnostics are present
+- Why successful:
+  - generated corpora and analysis outputs matched required structure and constraints.
+
+### 5) Benchmark competitiveness result (not successful vs family-aware in latest v1.5 snapshot)
+
+- Observed:
+  - best real cube mode: `cube_family_local_id_actual`
+  - best real cube bits: `248`
+  - family-aware bits: `196`
+  - gap: `+52` bits (cube worse)
+  - scaling verdict: `scaling_not_helping`
+- Why not successful:
+  - even with larger cube payload and longer average emitted route length, descriptor overhead and/or route vocabulary inefficiency still left the best real cube mode above family-aware cost on this run.
+
 ## Latest v1.5 Benchmark Snapshot (from `v1_5_metrics.json`)
 
 - `scaling_best_real_cube_mode`: `cube_family_local_id_actual`
