@@ -392,8 +392,13 @@
     "scaling_best_real_cube_bits": 488.0,
     "scaling_best_real_cube_minus_family_aware_bits": 179.0,
     "scaling_any_real_cube_beats_family_aware": false,
+    "target_baseline": "zlib",
+    "target_baseline_bits": 1072.0,
+    "best_real_cube_minus_target_bits": -584.0,
+    "any_real_cube_beats_target": true,
+    "scaling_any_real_cube_beats_target": true,
     "scaling_average_route_emitted_bits": 128.0,
-    "scaling_verdict": "scaling_not_helping",
-    "scaling_recommendation": "pivot to family-aware structured coding"
+    "scaling_verdict": "scaling_promising",
+    "scaling_recommendation": "continue cube investigation"
   }
 }

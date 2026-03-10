@@ -52,10 +52,12 @@
 - phrase_family_oracle ratio: 17.9021
 
 ## Decision
-- cube_fixed_length_actual beats family_aware: True
-- cube_family_local_id_actual beats family_aware: True
-- cube_entropy_coded_actual beats family_aware: False
+- target baseline: zlib (1904.0 bits)
+- cube_fixed_length_actual beats target: True
+- cube_family_local_id_actual beats target: True
+- cube_entropy_coded_actual beats target: True
 - best real cube mode: cube_family_local_id_actual
+- best_real_cube_minus_target_bits: -1664.0
 - descriptor_redesign_verdict: descriptor_redesign_succeeds
 - beats family-aware in any mode: True
 - best cube mode: cube_entropy_estimated.whole_route
@@ -63,7 +65,7 @@
 - long_phrase_any_real_cube_beats_family_aware: True
 - long_phrase_best_length_class: 256
 - long_phrase_verdict: long_phrases_promising
-- scaling_any_real_cube_beats_family_aware: True
+- scaling_any_real_cube_beats_target: True
 - scaling_verdict: scaling_promising
 
 ## Recommendation

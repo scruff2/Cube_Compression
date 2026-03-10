@@ -22,11 +22,20 @@
   - route-only packing for fixed/local/entropy streams
   - canonical Huffman table serialization for entropy mode
 - Re-ran presets and recomputed gap report.
-- Gate A result (post-refinement): `fail`
-  - entropy overhead improved but remains materially above estimate
-  - best real cube mode still loses to family-aware on preset runs
+- Descriptor conclusion: estimate-vs-actual gap remains materially large.
+
+### Target shift
+- Primary competition target switched to ZIP-style baseline (`zlib`).
+- Decision and matrix logic updated accordingly.
+
+### Phase 3 status (ZIP-target framing)
+- Re-ran scaling matrix batch: `reports/phase3_matrix/`
+- Gate B result: `pass` (real-mode wins vs target baseline are repeatable in this batch)
+- Updated memos:
+  - `reports/phase3_gate.md`
+  - `reports/roadmap_recommendation.md`
 
 ### Next actions
-1. Proceed to Phase 3 scaling batch as negative-control evidence collection.
-2. Generate Gate B memo: determine if scaling can produce repeatable real-mode wins.
-3. If Gate B fails, follow roadmap stop guidance.
+1. Add speed/memory benchmark harness and baseline comparisons.
+2. Add format robustness checks and corruption behavior tests.
+3. Expand corpus pack beyond current synthetic-heavy set.

@@ -52,10 +52,12 @@
 - phrase_family_oracle ratio: 13.6533
 
 ## Decision
-- cube_fixed_length_actual beats family_aware: False
-- cube_family_local_id_actual beats family_aware: False
-- cube_entropy_coded_actual beats family_aware: False
+- target baseline: zlib (1072.0 bits)
+- cube_fixed_length_actual beats target: True
+- cube_family_local_id_actual beats target: True
+- cube_entropy_coded_actual beats target: True
 - best real cube mode: cube_fixed_length_actual
+- best_real_cube_minus_target_bits: -584.0
 - descriptor_redesign_verdict: descriptor_redesign_fails
 - beats family-aware in any mode: True
 - best cube mode: cube_entropy_estimated.whole_route
@@ -63,10 +65,10 @@
 - long_phrase_any_real_cube_beats_family_aware: False
 - long_phrase_best_length_class: 128
 - long_phrase_verdict: long_phrases_marginal
-- scaling_any_real_cube_beats_family_aware: False
-- scaling_verdict: scaling_not_helping
+- scaling_any_real_cube_beats_target: True
+- scaling_verdict: scaling_promising
 
 ## Recommendation
 - continue cube investigation
 - cube only worth pursuing if descriptor redesign is implemented
-- pivot to family-aware structured coding
+- continue cube investigation

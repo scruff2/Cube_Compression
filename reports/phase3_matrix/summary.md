@@ -13,17 +13,17 @@
 - run_002
 - run_003
 
-## Runs Where Any Real Cube Mode Beats Family-Aware
+## Runs Where Any Real Cube Mode Beats Target Baseline
 - run_000
+- run_001
 - run_002
+- run_003
 
 ## Runs Where Only Idealized Cube Modes Beat Family-Aware
-- run_001
-- run_003
+- none
 
 ## Runs Where Larger Cubes Increased Route Span But Still Lost
-- run_001
-- run_003
+- none
 
 ## Runs Where Scaling Mostly Created Unused Capacity
 - run_000

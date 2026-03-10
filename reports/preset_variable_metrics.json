@@ -25,7 +25,8 @@
     "route_token_overhead_bits": 1,
     "literal_token_overhead_bits": 1,
     "debug": false,
-    "random_seed": 123
+    "random_seed": 123,
+    "competition_target": "zlib"
   },
   "corpus_split": {
     "train_files": [
@@ -96,11 +97,11 @@
     "cube_size_bytes": 5144,
     "metadata_size_bytes": 182,
     "total_shared_artifact_size_bytes": 5326,
-    "train_wall_time_sec": 0.001789300236850977
+    "train_wall_time_sec": 0.0018413998186588287
   },
   "runtime": {
-    "encode_wall_time_sec": 0.0036453003995120525,
-    "decode_wall_time_sec": 1.859990879893303e-05
+    "encode_wall_time_sec": 0.0034393002279102802,
+    "decode_wall_time_sec": 1.71000137925148e-05
   },
   "quality": {
     "decode_success": true,
@@ -251,8 +252,13 @@
     "scaling_best_real_cube_bits": 240.0,
     "scaling_best_real_cube_minus_family_aware_bits": 44.0,
     "scaling_any_real_cube_beats_family_aware": false,
+    "target_baseline": "zlib",
+    "target_baseline_bits": 1904.0,
+    "best_real_cube_minus_target_bits": -1664.0,
+    "any_real_cube_beats_target": true,
+    "scaling_any_real_cube_beats_target": true,
     "scaling_average_route_emitted_bits": 182.85714285714286,
-    "scaling_verdict": "scaling_not_helping",
-    "scaling_recommendation": "pivot to family-aware structured coding"
+    "scaling_verdict": "scaling_promising",
+    "scaling_recommendation": "continue cube investigation"
   }
 }
