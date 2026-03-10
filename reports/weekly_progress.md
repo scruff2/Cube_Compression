@@ -18,11 +18,15 @@
 - Generated descriptor estimate-vs-actual gap analysis:
   - `reports/phase2_descriptor_gap.md`
   - `reports/phase2_descriptor_gap.json`
-- Gate A result: `fail`
-  - descriptor estimate-vs-actual gaps remain large in key runs
-  - entropy-coded real mode overhead remains high vs estimate
+- Implemented bounded descriptor refinements:
+  - route-only packing for fixed/local/entropy streams
+  - canonical Huffman table serialization for entropy mode
+- Re-ran presets and recomputed gap report.
+- Gate A result (post-refinement): `fail`
+  - entropy overhead improved but remains materially above estimate
+  - best real cube mode still loses to family-aware on preset runs
 
 ### Next actions
-1. Implement bounded descriptor-coding refinements to reduce estimate-vs-actual gaps.
-2. Re-run preset benchmarks and Gate A.
-3. If Gate A passes, proceed to Phase 3 scaling decision batch.
+1. Proceed to Phase 3 scaling batch as negative-control evidence collection.
+2. Generate Gate B memo: determine if scaling can produce repeatable real-mode wins.
+3. If Gate B fails, follow roadmap stop guidance.

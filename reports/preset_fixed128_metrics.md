@@ -32,15 +32,15 @@
 - scaling_region_count: 42
 
 ## Real Descriptor-Coding Modes
-- cube_actual_legacy: bits=544, ratio=3.7647, decode_success=True
-- cube_fixed_length_actual: bits=480, ratio=4.2667, decode_success=True
-- cube_family_local_id_actual: bits=480, ratio=4.2667, decode_success=True
-- cube_entropy_coded_actual: bits=1040, ratio=1.9692, decode_success=True
+- cube_actual_legacy: bits=552, ratio=3.7101, decode_success=True
+- cube_fixed_length_actual: bits=488, ratio=4.1967, decode_success=True
+- cube_family_local_id_actual: bits=488, ratio=4.1967, decode_success=True
+- cube_entropy_coded_actual: bits=848, ratio=2.4151, decode_success=True
 
 ## Comparative Baseline Table
 | Mode | Bits | Ratio |
 |---|---:|---:|
-| cube_best_real (cube_fixed_length_actual) | 480.0 | 4.2667 |
+| cube_best_real (cube_fixed_length_actual) | 488.0 | 4.1967 |
 | family_aware | 309 | 6.6278 |
 | flat_dictionary | 249 | 8.2249 |
 | zlib | 1072 | 1.9104 |
