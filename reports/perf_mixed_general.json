@@ -1,0 +1,67 @@
+{
+  "config": {
+    "phrase_length": 256,
+    "phrase_mode": "variable",
+    "phrase_lengths": [
+      64,
+      128,
+      192,
+      256
+    ],
+    "stride": 32,
+    "overlap_strategy": "rolling",
+    "max_training_bytes": 1000000,
+    "train_sampling_seed": 123,
+    "min_frequency": 2,
+    "min_frequency_by_length": null,
+    "max_extracted_phrases": 800000,
+    "max_selected_phrases": 50000,
+    "max_selected_phrases_by_length": null,
+    "max_regions": 1024,
+    "max_middle_variants": 32,
+    "max_suffix_variants": 32,
+    "prefix_index_bits": 16,
+    "literal_block_bits": 8,
+    "route_token_overhead_bits": 1,
+    "literal_token_overhead_bits": 1,
+    "debug": false,
+    "random_seed": 123,
+    "competition_target": "zlib"
+  },
+  "train_file": "corpora/phase1/mixed_general/train.bin",
+  "test_file": "corpora/phase1/mixed_general/test.bin",
+  "test_bits": 112744,
+  "base_encode_sec": 28.786387899890542,
+  "base_decode_sec": 0.002405600156635046,
+  "peak_memory_bytes": 22098236,
+  "mode_results": {
+    "cube_actual_legacy": {
+      "compressed_bits": 135552,
+      "avg_encode_sec": 0.012547499872744084,
+      "avg_decode_sec": 0.012873839866369963,
+      "encode_mbps": 8.985375663952357,
+      "decode_mbps": 8.757604659548281
+    },
+    "cube_fixed_length_actual": {
+      "compressed_bits": 130136,
+      "avg_encode_sec": 0.01018273988738656,
+      "avg_decode_sec": 0.009722520038485527,
+      "encode_mbps": 11.072069133343657,
+      "decode_mbps": 11.596170494245861
+    },
+    "cube_family_local_id_actual": {
+      "compressed_bits": 125160,
+      "avg_encode_sec": 0.015608079824596643,
+      "avg_decode_sec": 0.015330360177904368,
+      "encode_mbps": 7.223438197844661,
+      "decode_mbps": 7.354295573726819
+    },
+    "cube_entropy_coded_actual": {
+      "compressed_bits": 137056,
+      "avg_encode_sec": 0.009042720124125481,
+      "avg_decode_sec": 0.011813339963555335,
+      "encode_mbps": 12.467929832219975,
+      "decode_mbps": 9.543786968615152
+    }
+  }
+}

@@ -1,0 +1,6 @@
+﻿{
+  "config": "sample_config_scaling_variable.json",
+  "train": "corpora/phase1/semi_structured_narrow/train.bin",
+  "test": "corpora/phase1/semi_structured_narrow/test.bin",
+  "output": "reports/preset_semi_structured_narrow_metrics.json"
+}

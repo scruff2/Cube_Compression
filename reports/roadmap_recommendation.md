@@ -2,23 +2,24 @@
 
 ## Current Target
 
-Primary competition target is now ZIP-style baseline behavior (`zlib`) rather than family-aware structured coding.
+Primary competition target remains ZIP-style baseline behavior (`zlib`).
 
-## Updated Gate Status
+## Updated Gate Status (2026-03-10)
 
 - Phase 0: pass
-- Phase 1: pass_with_limitations (real large narrow-domain corpus still missing)
-- Phase 2 descriptor estimate-vs-actual: still weak vs idealized estimates
-- Phase 3 scaling (ZIP-target framing): pass
+- Phase 1: pass
+- Phase 2 descriptor estimate-vs-actual: fail (real-coded gap remains large)
+- Phase 3 scaling (ZIP-target framing): pass on synthetic, fail on broader corpora
+- Phase 4 robustness: pass (current test budget)
+- Phase 5 perf envelope: measured baseline established
+- Phase 6 ZIP-class evaluation: fail
 
 ## Recommendation
 
-Continue execution under ZIP-target framing with the next priorities:
+1. Do not position the codec as a ZIP competitor in its current form.
+2. Keep the project in research mode for structured-data niches.
+3. If ZIP competition remains the goal, prioritize descriptor redesign for non-synthetic corpora before scaling further.
 
-1. Speed and memory characterization of winning real modes vs zlib.
-2. Robustness hardening (format/integrity/fuzzing).
-3. Broader corpus pack to verify wins are not synthetic-only.
+## Evidence
 
-## Important Caveat
-
-Cube still trails family-aware on many runs. This does not block ZIP-target progress, but should be documented as a separate in-domain efficiency gap.
+See `reports/zip_competition_results.md` for corpus-by-corpus ratio, speed, and memory results with charts.

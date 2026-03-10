@@ -1,0 +1,272 @@
+{
+  "config": {
+    "phrase_length": 256,
+    "phrase_mode": "variable",
+    "phrase_lengths": [
+      64,
+      128,
+      192,
+      256
+    ],
+    "stride": 32,
+    "overlap_strategy": "rolling",
+    "max_training_bytes": 1000000,
+    "train_sampling_seed": 123,
+    "min_frequency": 2,
+    "min_frequency_by_length": null,
+    "max_extracted_phrases": 800000,
+    "max_selected_phrases": 50000,
+    "max_selected_phrases_by_length": null,
+    "max_regions": 1024,
+    "max_middle_variants": 32,
+    "max_suffix_variants": 32,
+    "prefix_index_bits": 16,
+    "literal_block_bits": 8,
+    "route_token_overhead_bits": 1,
+    "literal_token_overhead_bits": 1,
+    "debug": false,
+    "random_seed": 123,
+    "competition_target": "zlib"
+  },
+  "corpus_split": {
+    "train_files": [
+      "corpora/phase1/semi_structured_narrow/train.bin"
+    ],
+    "test_files": [
+      "corpora/phase1/semi_structured_narrow/test.bin"
+    ]
+  },
+  "compression": {
+    "original_bits": 204504,
+    "compressed_bits": 167211,
+    "compression_ratio": 1.223029585374168,
+    "bits_per_source_bit": 0.8176417087196338,
+    "route_token_fraction": 0.07921619017025378,
+    "literal_token_fraction": 0.9207838098297463
+  },
+  "coverage": {
+    "route_hit_rate": 0.07921619017025378,
+    "route_bit_fraction": 0.4422016195282244,
+    "unique_routes_used": 458,
+    "route_coverage_by_length_class": {
+      "64": 69760,
+      "192": 6336,
+      "128": 13824,
+      "256": 512
+    },
+    "average_route_emitted_length": 73.34306569343066,
+    "max_route_emitted_length": 256,
+    "emitted_length_distribution": {
+      "64": 1090,
+      "192": 33,
+      "128": 108,
+      "256": 2
+    }
+  },
+  "search": {
+    "avg_candidate_routes_examined_per_position": 8.45413781637523,
+    "index_size": 5200
+  },
+  "training": {
+    "corpus_file_count": 1,
+    "corpus_bits": 500728,
+    "ingested_train_bits": 500728,
+    "extracted_phrases": 62572,
+    "selected_phrases": 2785,
+    "selected_phrases_by_length": {
+      "64": 1974,
+      "128": 562,
+      "192": 181,
+      "256": 68
+    },
+    "selected_source_mass_by_length": {
+      "64": 5879,
+      "128": 1323,
+      "192": 404,
+      "256": 145
+    },
+    "clusters": 1777,
+    "regions": 1777,
+    "regions_by_length": {
+      "64": 1024,
+      "128": 514,
+      "192": 171,
+      "256": 68
+    },
+    "cube_size_bits": 201744,
+    "cube_size_bytes": 25218,
+    "metadata_size_bytes": 183,
+    "total_shared_artifact_size_bytes": 25401,
+    "train_wall_time_sec": 0.062376899644732475
+  },
+  "runtime": {
+    "encode_wall_time_sec": 2.8700774000026286,
+    "decode_wall_time_sec": 0.002069199923425913
+  },
+  "quality": {
+    "decode_success": true,
+    "mismatch_location": -1
+  },
+  "baselines": {
+    "raw_literals": {
+      "compressed_bits": 230067,
+      "compression_ratio": 0.8888888888888888
+    },
+    "flat_dictionary": {
+      "compressed_bits": 143874,
+      "compression_ratio": 1.421410400767338,
+      "decode_success": true
+    },
+    "family_aware": {
+      "compressed_bits": 164307,
+      "compression_ratio": 1.2446456937318555,
+      "decode_success": true
+    },
+    "phrase_family_oracle": {
+      "estimated_bits": 24444,
+      "estimated_ratio": 8.366224840451645
+    },
+    "zlib": {
+      "compressed_bits": 57920,
+      "compression_ratio": 3.5308011049723755
+    },
+    "lzma": {
+      "compressed_bits": 54880,
+      "compression_ratio": 3.7263848396501458
+    }
+  },
+  "real_descriptor_coding_modes": {
+    "cube_actual_legacy": {
+      "implemented": true,
+      "compressed_bits": 280752,
+      "compression_ratio": 0.7284151136946486,
+      "decode_success": true
+    },
+    "cube_fixed_length_actual": {
+      "implemented": true,
+      "compressed_bits": 271312,
+      "compression_ratio": 0.7537595093471723,
+      "decode_success": true
+    },
+    "cube_family_local_id_actual": {
+      "implemented": true,
+      "compressed_bits": 261464,
+      "compression_ratio": 0.7821497414558027,
+      "decode_success": true
+    },
+    "cube_entropy_coded_actual": {
+      "implemented": true,
+      "compressed_bits": 281184,
+      "compression_ratio": 0.7272960054626152,
+      "decode_success": true
+    }
+  },
+  "cube_descriptor_idealization": {
+    "cube_actual": {
+      "total_estimated_compressed_bits": 167211.0,
+      "bits_per_source_bit": 0.8176417087196338,
+      "compression_ratio": 1.223029585374168,
+      "average_bits_per_route_token": 31.0,
+      "delta_vs_cube_actual_bits": 0.0,
+      "delta_vs_family_aware_bits": 2904.0,
+      "delta_vs_target_bits": 109291.0
+    },
+    "cube_fixed_length_optimized": {
+      "total_estimated_compressed_bits": 156114.0,
+      "bits_per_source_bit": 0.7633787114188475,
+      "compression_ratio": 1.3099657942272955,
+      "average_bits_per_route_token": 22.0,
+      "delta_vs_cube_actual_bits": -11097.0,
+      "delta_vs_family_aware_bits": -8193.0,
+      "delta_vs_target_bits": 98194.0
+    },
+    "cube_entropy_estimated.whole_route": {
+      "total_estimated_compressed_bits": 140560.0853768562,
+      "bits_per_source_bit": 0.6873219368660575,
+      "compression_ratio": 1.4549222807577522,
+      "average_bits_per_route_token": 9.385308497044775,
+      "delta_vs_cube_actual_bits": -26650.91462314379,
+      "delta_vs_family_aware_bits": -23746.91462314379,
+      "delta_vs_target_bits": 82640.08537685621
+    },
+    "cube_entropy_estimated.factorized": {
+      "total_estimated_compressed_bits": 140560.0853768562,
+      "bits_per_source_bit": 0.6873219368660575,
+      "compression_ratio": 1.4549222807577522,
+      "average_bits_per_route_token": 9.38530849704477,
+      "delta_vs_cube_actual_bits": -26650.91462314379,
+      "delta_vs_family_aware_bits": -23746.91462314379,
+      "delta_vs_target_bits": 82640.08537685621
+    },
+    "cube_family_local_id": {
+      "total_estimated_compressed_bits": 141952.0,
+      "bits_per_source_bit": 0.6941282322106169,
+      "compression_ratio": 1.440655996393147,
+      "average_bits_per_route_token": 10.51419302514193,
+      "delta_vs_cube_actual_bits": -25259.0,
+      "delta_vs_family_aware_bits": -22355.0,
+      "delta_vs_target_bits": 84032.0
+    },
+    "cube_oracle_used_route": {
+      "total_estimated_compressed_bits": 140560.0853768562,
+      "bits_per_source_bit": 0.6873219368660575,
+      "compression_ratio": 1.4549222807577522,
+      "average_bits_per_route_token": 9.385308497044775,
+      "delta_vs_cube_actual_bits": -26650.91462314379,
+      "delta_vs_family_aware_bits": -23746.91462314379,
+      "delta_vs_target_bits": 82640.08537685621
+    },
+    "cube_oracle_region_local": {
+      "total_estimated_compressed_bits": 140560.0853768562,
+      "bits_per_source_bit": 0.6873219368660575,
+      "compression_ratio": 1.4549222807577522,
+      "average_bits_per_route_token": 9.385308497044772,
+      "delta_vs_cube_actual_bits": -26650.91462314379,
+      "delta_vs_family_aware_bits": -23746.91462314379,
+      "delta_vs_target_bits": 82640.08537685621
+    },
+    "cube_oracle_factorized": {
+      "total_estimated_compressed_bits": 140560.0853768562,
+      "bits_per_source_bit": 0.6873219368660575,
+      "compression_ratio": 1.4549222807577522,
+      "average_bits_per_route_token": 9.38530849704477,
+      "delta_vs_cube_actual_bits": -26650.91462314379,
+      "delta_vs_family_aware_bits": -23746.91462314379,
+      "delta_vs_target_bits": 82640.08537685621
+    }
+  },
+  "decision": {
+    "beats_family_aware_in_any_mode": true,
+    "beats_family_aware_in_realistic_mode": true,
+    "best_cube_mode": "cube_entropy_estimated.whole_route",
+    "best_cube_bits": 140560.0853768562,
+    "best_cube_minus_family_aware": -23746.91462314379,
+    "final_verdict": "geometry_promising",
+    "recommendation": "continue cube investigation",
+    "best_real_cube_mode": "cube_family_local_id_actual",
+    "best_real_cube_minus_family_aware_bits": 97157.0,
+    "descriptor_redesign_verdict": "descriptor_redesign_fails",
+    "long_phrase_best_real_cube_mode": "cube_family_local_id_actual",
+    "long_phrase_best_real_cube_bits": 261464.0,
+    "long_phrase_best_real_cube_minus_family_aware_bits": 97157.0,
+    "long_phrase_any_real_cube_beats_family_aware": false,
+    "long_phrase_best_length_class": "64",
+    "long_phrase_verdict": "long_phrases_not_helping",
+    "long_phrase_recommendation": "pivot away from cube descriptor path",
+    "scaling_train_bits": 500728,
+    "scaling_cube_payload_bits": 201744,
+    "scaling_region_count": 1777,
+    "scaling_best_real_cube_mode": "cube_family_local_id_actual",
+    "scaling_best_real_cube_bits": 261464.0,
+    "scaling_best_real_cube_minus_family_aware_bits": 97157.0,
+    "scaling_any_real_cube_beats_family_aware": false,
+    "target_baseline": "zlib",
+    "target_baseline_bits": 57920.0,
+    "best_real_cube_minus_target_bits": 203544.0,
+    "any_real_cube_beats_target": false,
+    "scaling_any_real_cube_beats_target": false,
+    "scaling_average_route_emitted_bits": 73.34306569343066,
+    "scaling_verdict": "scaling_not_helping",
+    "scaling_recommendation": "pivot away from cube descriptor path"
+  }
+}

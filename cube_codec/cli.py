@@ -75,6 +75,14 @@ def cmd_benchmark(args: argparse.Namespace) -> None:
     print(Path(args.output).with_suffix(".md").read_text(encoding="utf-8"))
 
 
+def cmd_benchmark_preset(args: argparse.Namespace) -> None:
+    preset = json.loads(Path(args.preset).read_text(encoding="utf-8-sig"))
+    config = _load_config(preset["config"])
+    result = run_benchmark(config, [preset["train"]], [preset["test"]])
+    write_benchmark_outputs(preset["output"], result)
+    print(Path(preset["output"]).with_suffix(".md").read_text(encoding="utf-8"))
+
+
 def cmd_inspect_cube(args: argparse.Namespace) -> None:
     cube = load_cube_from_dir(args.cube_dir)
     print("Cube metadata:")
@@ -152,6 +160,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_bench.add_argument("--test", required=True)
     p_bench.add_argument("--output", required=True)
     p_bench.set_defaults(func=cmd_benchmark)
+
+    p_preset = sub.add_parser("benchmark-preset")
+    p_preset.add_argument("--preset", required=True)
+    p_preset.set_defaults(func=cmd_benchmark_preset)
 
     p_inspect = sub.add_parser("inspect-cube")
     p_inspect.add_argument("--cube-dir", required=True)

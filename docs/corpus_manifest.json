@@ -28,10 +28,28 @@
       "split": "locked",
       "seed": 0,
       "regime": "fixed_64"
+    },
+    {
+      "id": "semi_structured_narrow_requirements_pack_v1",
+      "family": "semi_structured_narrow_domain",
+      "train_file": "corpora/phase1/semi_structured_narrow/train.bin",
+      "test_file": "corpora/phase1/semi_structured_narrow/test.bin",
+      "split": "locked_by_file_list",
+      "seed": 0,
+      "regime": "variable_64_128_192_256"
+    },
+    {
+      "id": "mixed_general_reference_pack_v1",
+      "family": "mixed_general_reference",
+      "train_file": "corpora/phase1/mixed_general/train.bin",
+      "test_file": "corpora/phase1/mixed_general/test.bin",
+      "split": "locked_by_file_list",
+      "seed": 0,
+      "regime": "variable_64_128_192_256"
     }
   ],
   "notes": [
-    "No large real narrow-domain corpus has been provided yet.",
-    "Phase 1 completeness for real-corpus coverage is pending external data."
+    "Structured synthetic corpora remain deterministic and locked.",
+    "Semi-structured and mixed-general packs are local locked references for repeatable ZIP-target comparisons."
   ]
 }

@@ -21,6 +21,13 @@ python -m cube_codec.cli benchmark \
   --output metrics.json
 ```
 
+Run a locked corpus preset in one command:
+
+```bash
+python -m cube_codec.cli benchmark-preset \
+  --preset configs/presets/structured_synthetic.json
+```
+
 Run scaling matrix:
 
 ```bash
@@ -99,7 +106,7 @@ flowchart LR
 ## Latest Test Results
 
 - Command: `pytest -q`
-- Result: `21 passed`
+- Result: `26 passed`
 
 ## Test Description and Outcomes
 
@@ -144,76 +151,64 @@ flowchart LR
 - Why successful:
   - generated corpora and analysis outputs matched required structure and constraints.
 
-### 5) Benchmark competitiveness result (not successful vs family-aware in latest v1.5 snapshot)
+### 5) ZIP-target competitiveness result (mixed outcome)
 
-- Observed:
-  - best real cube mode: `cube_family_local_id_actual`
-  - best real cube bits: `248`
-  - family-aware bits: `196`
-  - gap: `+52` bits (cube worse)
-  - scaling verdict: `scaling_not_helping`
+- Target baseline: `zlib`
+- Observed best real mode in all three latest preset families: `cube_family_local_id_actual`
+- Why successful:
+  - On structured synthetic, cube beats zlib by a large margin.
 - Why not successful:
-  - even with larger cube payload and longer average emitted route length, descriptor overhead and/or route vocabulary inefficiency still left the best real cube mode above family-aware cost on this run.
+  - On semi-structured and mixed-general corpora, cube remains substantially above zlib/lzma bit cost.
 
-## Latest v1.5 Benchmark Snapshot (from `v1_5_metrics.json`)
-
-- `scaling_best_real_cube_mode`: `cube_family_local_id_actual`
-- `scaling_best_real_cube_bits`: `248`
-- `family_aware_bits`: `196`
-- `scaling_average_route_emitted_bits`: `182.86`
-- `scaling_cube_payload_bits`: `41152`
-- `scaling_verdict`: `scaling_not_helping`
+Full details: `reports/zip_competition_results.md`.
 
 ## Expected Compression Ratio (Current Prototype)
 
-For the current v1.5 scaling snapshot (`v1_5_metrics.json`, variable-length regime), expected compression ratios are:
+Expected best-real-mode ratio by corpus family (higher is better):
 
-| Technique | Ratio (higher is better) | Notes |
-|---|---:|---|
-| Flat dictionary baseline | `18.2857` | Best in this run |
-| Family-aware baseline | `13.0612` | Primary target baseline |
-| Cube real mode: `cube_family_local_id_actual` | `10.3226` | Best real cube mode in this run |
-| Cube real mode: `cube_fixed_length_actual` | `8.4211` | Improved vs legacy, still below family-aware |
-| Cube real mode: `cube_actual_legacy` | `6.1538` | Legacy descriptor format |
-| zlib | `1.3445` | General-purpose reference |
-| lzma | `1.0667` | General-purpose reference |
+| Corpus family | Cube best real ratio | zlib ratio | lzma ratio | Outcome |
+|---|---:|---:|---:|---|
+| structured synthetic | `10.6667` | `1.3445` | `1.0667` | cube wins |
+| semi-structured narrow | `0.7821` | `3.5308` | `3.7264` | cube loses |
+| mixed general | `0.9008` | `3.5454` | `3.6062` | cube loses |
 
 Interpretation:
-- In this structured synthetic run, dictionary-style baselines outperform current real cube streams.
-- The expected practical range for **real cube modes** in similar runs is currently around `6x` to `10x`, while family-aware/flat are often higher.
-- This is why the current scaling decision remains `scaling_not_helping` for the cube approach in its present implementation.
+- Compression is currently niche-strong only on synthetic-structured data.
+- For broader data, expected cube ratio is below common ZIP-class techniques.
 
 ## Charts
 
-### Real Mode Compressed Size (bits)
+### Best Real Bits vs zlib
 
 ```mermaid
 xychart-beta
-    title "v1.5 Real Mode Bits (Lower is Better)"
-    x-axis [legacy, fixed, local_id, entropy, family_aware, flat_dict]
-    y-axis "bits" 0 --> 1300
-    bar [416, 304, 248, 1208, 196, 140]
+    title "Best Real Mode Bits vs zlib (Lower is Better)"
+    x-axis [synthetic, semi_structured, mixed_general]
+    y-axis "bits" 0 --> 280000
+    bar [240, 261464, 125160]
+    bar [1904, 57920, 31800]
 ```
 
-### Route Coverage by Length Class (bits covered)
-
-```mermaid
-pie showData
-    title v1.5 Route Coverage by Length Class
-    "64-bit" : 256
-    "128-bit" : 128
-    "192-bit" : 384
-    "256-bit" : 1792
-```
-
-### Scaling Matrix: Best Real Gap vs Family-Aware
+### Best Real Ratio vs zlib
 
 ```mermaid
 xychart-beta
-    title "v1.5 Matrix: best_real_cube_minus_family_aware_bits"
-    x-axis [run_000, run_001, run_002, run_003]
-    y-axis "bits (negative is better)" -300 --> 100
-    line [-268, 66, -268, 66]
+    title "Best Real Compression Ratio vs zlib"
+    x-axis [synthetic, semi_structured, mixed_general]
+    y-axis "ratio" 0 --> 12
+    line [10.6667, 0.7821, 0.9008]
+    line [1.3445, 3.5308, 3.5454]
+```
+
+### Best Real Throughput by Corpus
+
+```mermaid
+xychart-beta
+    title "Best Real Throughput by Corpus"
+    x-axis [synthetic, semi_structured, mixed_general]
+    y-axis "MB/s" 0 --> 13
+    bar [9.755, 10.430, 7.223]
+    bar [11.814, 9.457, 7.354]
 ```
 
 ## Repository Structure

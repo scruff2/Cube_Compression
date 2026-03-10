@@ -1,0 +1,67 @@
+{
+  "config": {
+    "phrase_length": 256,
+    "phrase_mode": "variable",
+    "phrase_lengths": [
+      64,
+      128,
+      192,
+      256
+    ],
+    "stride": 32,
+    "overlap_strategy": "rolling",
+    "max_training_bytes": 1000000,
+    "train_sampling_seed": 123,
+    "min_frequency": 2,
+    "min_frequency_by_length": null,
+    "max_extracted_phrases": 800000,
+    "max_selected_phrases": 50000,
+    "max_selected_phrases_by_length": null,
+    "max_regions": 1024,
+    "max_middle_variants": 32,
+    "max_suffix_variants": 32,
+    "prefix_index_bits": 16,
+    "literal_block_bits": 8,
+    "route_token_overhead_bits": 1,
+    "literal_token_overhead_bits": 1,
+    "debug": false,
+    "random_seed": 123,
+    "competition_target": "zlib"
+  },
+  "train_file": "corpora/phase1/semi_structured_narrow/train.bin",
+  "test_file": "corpora/phase1/semi_structured_narrow/test.bin",
+  "test_bits": 204504,
+  "base_encode_sec": 7.849233999848366,
+  "base_decode_sec": 0.004726700019091368,
+  "peak_memory_bytes": 39903139,
+  "mode_results": {
+    "cube_actual_legacy": {
+      "compressed_bits": 280752,
+      "avg_encode_sec": 0.02351806005463004,
+      "avg_decode_sec": 0.029977620113641024,
+      "encode_mbps": 8.695615179354002,
+      "decode_mbps": 6.82188910342961
+    },
+    "cube_fixed_length_actual": {
+      "compressed_bits": 271312,
+      "avg_encode_sec": 0.020758519880473614,
+      "avg_decode_sec": 0.022485480085015296,
+      "encode_mbps": 9.851569436430077,
+      "decode_mbps": 9.094935897601088
+    },
+    "cube_family_local_id_actual": {
+      "compressed_bits": 261464,
+      "avg_encode_sec": 0.019607419986277817,
+      "avg_decode_sec": 0.021624900028109552,
+      "encode_mbps": 10.42992908516885,
+      "decode_mbps": 9.456876088868453
+    },
+    "cube_entropy_coded_actual": {
+      "compressed_bits": 281184,
+      "avg_encode_sec": 0.01951919998973608,
+      "avg_decode_sec": 0.02523328009992838,
+      "encode_mbps": 10.477068737834326,
+      "decode_mbps": 8.104534931254557
+    }
+  }
+}

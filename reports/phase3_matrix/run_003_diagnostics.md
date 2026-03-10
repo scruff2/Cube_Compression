@@ -9,7 +9,8 @@
 
 ## Cube Viability Decision
 - final_verdict: geometry_promising
-- beats_family_aware_in_any_mode: True
+- target_baseline: zlib
+- any_real_cube_beats_target: True
 - best_cube_mode: cube_entropy_estimated.whole_route
 - descriptor_redesign_verdict: descriptor_redesign_fails
 

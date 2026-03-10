@@ -29,16 +29,17 @@ REQUIRED_MATRIX_COLUMNS = [
     "cube_entropy_factorized_bits",
     "cube_family_local_id_bits",
     "cube_oracle_region_local_bits",
-    "family_aware_bits",
+    "target_baseline",
+    "target_baseline_bits",
     "best_cube_mode",
     "best_cube_bits",
-    "best_cube_minus_family_aware",
+    "best_cube_minus_target",
     "geometry_verdict",
     "cube_fixed_length_actual_bits",
     "cube_family_local_id_actual_bits",
     "cube_entropy_coded_actual_bits",
     "best_real_cube_mode",
-    "best_real_cube_minus_family_aware_bits",
+    "best_real_cube_minus_target_bits",
     "descriptor_redesign_verdict",
     "scaling_verdict",
 ]
@@ -69,8 +70,8 @@ def run_benchmark_matrix(
     out.mkdir(parents=True, exist_ok=True)
 
     rows: list[dict] = []
-    winning_runs: list[str] = []
     real_winning_runs: list[str] = []
+    ideal_target_runs: list[str] = []
     ideal_only_runs: list[str] = []
     longer_but_lost_runs: list[str] = []
     unused_capacity_runs: list[str] = []
@@ -84,13 +85,13 @@ def run_benchmark_matrix(
         write_benchmark_outputs(str(metrics_path), result)
 
         modes = result.metrics["cube_descriptor_idealization"]
-        family_aware_bits = result.metrics["baselines"]["family_aware"]["compressed_bits"]
-        if result.metrics["decision"]["beats_family_aware_in_any_mode"]:
-            winning_runs.append(run_name)
+        target_bits = result.metrics["decision"]["target_baseline_bits"]
         best_real_delta = result.metrics["decision"]["best_real_cube_minus_target_bits"]
+        if result.metrics["decision"]["best_cube_bits"] < target_bits:
+            ideal_target_runs.append(run_name)
         if best_real_delta is not None and best_real_delta < 0:
             real_winning_runs.append(run_name)
-        elif result.metrics["decision"]["beats_family_aware_in_any_mode"]:
+        elif result.metrics["decision"]["best_cube_bits"] < target_bits:
             ideal_only_runs.append(run_name)
         if result.metrics["coverage"]["average_route_emitted_length"] >= 128 and (best_real_delta is None or best_real_delta >= 0):
             longer_but_lost_runs.append(run_name)
@@ -115,16 +116,17 @@ def run_benchmark_matrix(
             "cube_entropy_factorized_bits": modes["cube_entropy_estimated.factorized"]["total_estimated_compressed_bits"],
             "cube_family_local_id_bits": modes["cube_family_local_id"]["total_estimated_compressed_bits"],
             "cube_oracle_region_local_bits": modes["cube_oracle_region_local"]["total_estimated_compressed_bits"],
-            "family_aware_bits": family_aware_bits,
+            "target_baseline": result.metrics["decision"]["target_baseline"],
+            "target_baseline_bits": target_bits,
             "best_cube_mode": result.metrics["decision"]["best_cube_mode"],
             "best_cube_bits": result.metrics["decision"]["best_cube_bits"],
-            "best_cube_minus_family_aware": result.metrics["decision"]["best_cube_minus_family_aware"],
+            "best_cube_minus_target": result.metrics["decision"]["best_cube_bits"] - target_bits,
             "geometry_verdict": result.metrics["decision"]["final_verdict"],
             "cube_fixed_length_actual_bits": result.metrics["real_descriptor_coding_modes"].get("cube_fixed_length_actual", {}).get("compressed_bits"),
             "cube_family_local_id_actual_bits": result.metrics["real_descriptor_coding_modes"].get("cube_family_local_id_actual", {}).get("compressed_bits"),
             "cube_entropy_coded_actual_bits": result.metrics["real_descriptor_coding_modes"].get("cube_entropy_coded_actual", {}).get("compressed_bits"),
             "best_real_cube_mode": result.metrics["decision"]["best_real_cube_mode"],
-            "best_real_cube_minus_family_aware_bits": best_real_delta,
+            "best_real_cube_minus_target_bits": best_real_delta,
             "descriptor_redesign_verdict": result.metrics["decision"]["descriptor_redesign_verdict"],
             "long_phrase_verdict": result.metrics["decision"].get("long_phrase_verdict"),
             "scaling_verdict": result.metrics["decision"].get("scaling_verdict"),
@@ -142,18 +144,18 @@ def run_benchmark_matrix(
     md_lines = [
         "# Benchmark Matrix Summary",
         "",
-        "| run | cube_actual_bits | family_aware_bits | best_cube_mode | best_cube_bits | best_cube_minus_family_aware | geometry_verdict |",
-        "|---|---:|---:|---|---:|---:|---|",
+        "| run | cube_actual_bits | target_baseline | target_baseline_bits | best_cube_mode | best_cube_bits | best_cube_minus_target | geometry_verdict |",
+        "|---|---:|---|---:|---|---:|---:|---|",
     ]
     for row in rows:
         md_lines.append(
-            f"| {row['run']} | {row['cube_actual_bits']:.2f} | {row['family_aware_bits']:.2f} | {row['best_cube_mode']} | {row['best_cube_bits']:.2f} | {row['best_cube_minus_family_aware']:.2f} | {row['geometry_verdict']} |"
+            f"| {row['run']} | {row['cube_actual_bits']:.2f} | {row['target_baseline']} | {row['target_baseline_bits']:.2f} | {row['best_cube_mode']} | {row['best_cube_bits']:.2f} | {row['best_cube_minus_target']:.2f} | {row['geometry_verdict']} |"
         )
 
     md_lines.append("")
-    md_lines.append("## Runs Where Cube Idealization Beats Family-Aware")
-    if winning_runs:
-        for run in winning_runs:
+    md_lines.append("## Runs Where Cube Idealization Beats Target Baseline")
+    if ideal_target_runs:
+        for run in ideal_target_runs:
             md_lines.append(f"- {run}")
     else:
         md_lines.append("- none")
@@ -167,7 +169,7 @@ def run_benchmark_matrix(
         md_lines.append("- none")
 
     md_lines.append("")
-    md_lines.append("## Runs Where Only Idealized Cube Modes Beat Family-Aware")
+    md_lines.append("## Runs Where Only Idealized Cube Modes Beat Target Baseline")
     if ideal_only_runs:
         for run in ideal_only_runs:
             md_lines.append(f"- {run}")
@@ -193,9 +195,9 @@ def run_benchmark_matrix(
     md_lines.append("")
     md_lines.append("## Final Scaling Interpretation")
     if real_winning_runs:
-        md_lines.append("- scaling appears promising in at least some real-mode runs")
+        md_lines.append("- scaling appears promising in at least some real-mode runs against target baseline")
     elif longer_but_lost_runs:
-        md_lines.append("- scaling increases route span but still does not beat family-aware")
+        md_lines.append("- scaling increases route span but still does not beat target baseline")
     else:
         md_lines.append("- scaling is not helping enough to justify continued cube investment")
 

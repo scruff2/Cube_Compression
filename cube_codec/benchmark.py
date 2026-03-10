@@ -259,7 +259,7 @@ def _recommendation(verdict: str) -> str:
     if verdict == "geometry_marginal":
         return "cube only worth pursuing if descriptor redesign is implemented"
     if verdict == "geometry_unnecessary":
-        return "pivot to family-aware structured coding"
+        return "pivot away from cube descriptor path"
     return "insufficient evidence, rerun on stronger corpus"
 
 
@@ -327,6 +327,12 @@ def run_benchmark(config: CodecConfig, train_files: list[str], test_files: list[
     raw_bits = estimate_stream_bits(raw_stream, model)
     zlib_bits = compress_zlib_bits(test_bits)
     lzma_bits = compress_lzma_bits(test_bits)
+    target_key = config.competition_target
+    target_bits = {
+        "zlib": float(zlib_bits),
+        "lzma": float(lzma_bits),
+        "flat_dictionary": float(flat_bits),
+    }[target_key]
 
     route_descriptor_counter = Counter(f"{t.region_id}:{t.middle_id}:{t.suffix_id}" for t in route_tokens)
     region_len_map = {r.region_id: r.route_length for r in cube.regions}
@@ -349,6 +355,7 @@ def run_benchmark(config: CodecConfig, train_files: list[str], test_files: list[
         row = dict(row)
         row["delta_vs_cube_actual_bits"] = row["total_estimated_compressed_bits"] - cube_rows["cube_actual"]["total_estimated_compressed_bits"]
         row["delta_vs_family_aware_bits"] = row["total_estimated_compressed_bits"] - family_bits
+        row["delta_vs_target_bits"] = row["total_estimated_compressed_bits"] - target_bits
         cube_rows_with_delta[mode_name] = row
 
     real_modes: dict[str, dict] = {}
@@ -422,16 +429,10 @@ def run_benchmark(config: CodecConfig, train_files: list[str], test_files: list[
     elif long_phrase_verdict == "long_phrases_marginal":
         long_phrase_reco = "cube only worth pursuing if descriptor redesign is implemented"
     elif long_phrase_verdict == "long_phrases_not_helping":
-        long_phrase_reco = "pivot to family-aware structured coding"
+        long_phrase_reco = "pivot away from cube descriptor path"
     else:
         long_phrase_reco = "insufficient evidence, rerun on stronger corpus"
 
-    target_key = config.competition_target
-    target_bits = {
-        "zlib": float(zlib_bits),
-        "lzma": float(lzma_bits),
-        "flat_dictionary": float(flat_bits),
-    }[target_key]
     target_any_real = bool(real_candidates and best_real_bits < target_bits)
 
     scaling_any_real = target_any_real
@@ -449,7 +450,7 @@ def run_benchmark(config: CodecConfig, train_files: list[str], test_files: list[
     elif scaling_verdict == "scaling_marginal":
         scaling_reco = "cube only worth pursuing if descriptor redesign is implemented"
     elif scaling_verdict == "scaling_not_helping":
-        scaling_reco = "pivot to family-aware structured coding"
+        scaling_reco = "pivot away from cube descriptor path"
     else:
         scaling_reco = "insufficient evidence, rerun on stronger corpus"
 
@@ -682,7 +683,7 @@ def markdown_report(metrics: dict, diagnostics: dict | None = None) -> str:
         f"- stride: {metrics['config']['stride']}",
         "",
         "## Cube Descriptor Idealization Table",
-        "| Mode | Total Bits | Bits/Source Bit | Compression Ratio | Avg Bits/Route | Delta vs cube_actual | Delta vs family_aware |",
+        "| Mode | Total Bits | Bits/Source Bit | Compression Ratio | Avg Bits/Route | Delta vs cube_actual | Delta vs target_baseline |",
         "|---|---:|---:|---:|---:|---:|---:|",
     ]
 
@@ -699,7 +700,7 @@ def markdown_report(metrics: dict, diagnostics: dict | None = None) -> str:
     ]:
         row = table[mode]
         lines.append(
-            f"| {mode} | {row['total_estimated_compressed_bits']:.2f} | {row['bits_per_source_bit']:.4f} | {row['compression_ratio']:.4f} | {row['average_bits_per_route_token']:.4f} | {row['delta_vs_cube_actual_bits']:.2f} | {row['delta_vs_family_aware_bits']:.2f} |"
+            f"| {mode} | {row['total_estimated_compressed_bits']:.2f} | {row['bits_per_source_bit']:.4f} | {row['compression_ratio']:.4f} | {row['average_bits_per_route_token']:.4f} | {row['delta_vs_cube_actual_bits']:.2f} | {row['delta_vs_target_bits']:.2f} |"
         )
 
     lines += [
@@ -754,10 +755,9 @@ def markdown_report(metrics: dict, diagnostics: dict | None = None) -> str:
         f"- best real cube mode: {metrics['decision']['best_real_cube_mode']}",
         f"- best_real_cube_minus_target_bits: {metrics['decision']['best_real_cube_minus_target_bits']}",
         f"- descriptor_redesign_verdict: {metrics['decision']['descriptor_redesign_verdict']}",
-        f"- beats family-aware in any mode: {metrics['decision']['beats_family_aware_in_any_mode']}",
+        f"- any_real_cube_beats_target: {metrics['decision']['any_real_cube_beats_target']}",
         f"- best cube mode: {metrics['decision']['best_cube_mode']}",
         f"- final verdict: {metrics['decision']['final_verdict']}",
-        f"- long_phrase_any_real_cube_beats_family_aware: {metrics['decision']['long_phrase_any_real_cube_beats_family_aware']}",
         f"- long_phrase_best_length_class: {metrics['decision']['long_phrase_best_length_class']}",
         f"- long_phrase_verdict: {metrics['decision']['long_phrase_verdict']}",
         f"- scaling_any_real_cube_beats_target: {metrics['decision']['scaling_any_real_cube_beats_target']}",
@@ -789,7 +789,8 @@ def diagnostics_markdown(metrics: dict, diagnostics: dict) -> str:
         "",
         "## Cube Viability Decision",
         f"- final_verdict: {diagnostics['decision']['final_verdict']}",
-        f"- beats_family_aware_in_any_mode: {diagnostics['decision']['beats_family_aware_in_any_mode']}",
+        f"- target_baseline: {diagnostics['decision']['target_baseline']}",
+        f"- any_real_cube_beats_target: {diagnostics['decision']['any_real_cube_beats_target']}",
         f"- best_cube_mode: {diagnostics['decision']['best_cube_mode']}",
         f"- descriptor_redesign_verdict: {diagnostics['decision']['descriptor_redesign_verdict']}",
         "",

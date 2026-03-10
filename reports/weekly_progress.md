@@ -42,3 +42,35 @@
 1. Add corruption-behavior notes to docs and format spec draft.
 2. Expand perf runs across additional presets and summarize in `reports/perf_baseline.md`.
 3. Build broader corpus pack manifest for stronger ZIP-target external validity.
+
+## 2026-03-10
+
+### Phase 1 completion
+- Added locked corpus packs:
+  - `corpora/phase1/semi_structured_narrow/`
+  - `corpora/phase1/mixed_general/`
+- Updated corpus docs and manifest:
+  - `docs/corpora.md`
+  - `docs/corpus_manifest.json`
+- Added one-command preset runner:
+  - `python -m cube_codec.cli benchmark-preset --preset <preset.json>`
+
+### ZIP-target reporting cleanup
+- Updated matrix reporting to target-baseline framing.
+- Removed family-aware competition wording from benchmark report decisions.
+- Added `delta_vs_target_baseline` in idealized mode tables.
+
+### New benchmark/perf artifacts
+- Generated preset benchmark outputs:
+  - `reports/preset_structured_synth_metrics.json`
+  - `reports/preset_semi_structured_narrow_metrics.json`
+  - `reports/preset_mixed_general_metrics.json`
+- Generated perf outputs:
+  - `reports/perf_structured_synthetic.json`
+  - `reports/perf_semi_structured_narrow.json`
+  - `reports/perf_mixed_general.json`
+
+### Phase 6 snapshot
+- Added ZIP competition report with charts:
+  - `reports/zip_competition_results.md`
+- Gate C result: fail for ZIP-class positioning (wins are synthetic-only; broader corpora lose to zlib/lzma).

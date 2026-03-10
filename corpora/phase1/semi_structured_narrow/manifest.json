@@ -1,0 +1,15 @@
+﻿{
+    "split":  "locked_by_file_list",
+    "seed":  0,
+    "id":  "semi_structured_narrow_requirements_pack_v1",
+    "train_files":  [
+                        "Requirements Repo/cube_route_codec_requirements 2026-03-07.md",
+                        "Requirements Repo/cube_route_codec_v1_1_requirements.md",
+                        "Requirements Repo/cube_route_codec_v1_2_requirements.md",
+                        "Requirements Repo/cube_route_codec_v1_3_requirements.md"
+                    ],
+    "test_files":  [
+                       "Requirements Repo/cube_route_codec_v1_4_requirements.md",
+                       "cube_route_codec_v1_5_requirements.md"
+                   ]
+}

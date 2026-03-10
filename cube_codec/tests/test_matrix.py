@@ -37,7 +37,8 @@ def test_benchmark_matrix_outputs(tmp_path) -> None:
         assert col in rows[0]
 
     md = (out_dir / "summary.md").read_text(encoding="utf-8")
-    assert "## Runs Where Cube Idealization Beats Family-Aware" in md
+    assert "## Runs Where Cube Idealization Beats Target Baseline" in md
+    assert "## Runs Where Only Idealized Cube Modes Beat Target Baseline" in md
     assert "## Runs Where Larger Cubes Increased Route Span But Still Lost" in md
     assert "## Runs Where Scaling Mostly Created Unused Capacity" in md
     assert "## Final Scaling Interpretation" in md

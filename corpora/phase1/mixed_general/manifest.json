@@ -1,0 +1,24 @@
+﻿{
+    "split":  "locked_by_file_list",
+    "seed":  0,
+    "id":  "mixed_general_reference_pack_v1",
+    "train_files":  [
+                        "cube_codec/benchmark.py",
+                        "cube_codec/stream_codecs.py",
+                        "cube_codec/encoder.py",
+                        "cube_codec/decoder.py",
+                        "cube_codec/config.py",
+                        "sample_config_scaling_variable.json",
+                        "sample_config_scaling_fixed_128.json",
+                        "README.md",
+                        "docs/benchmark_schema.md",
+                        "train_small.bin"
+                    ],
+    "test_files":  [
+                       "cube_codec/matrix.py",
+                       "cube_codec/perf.py",
+                       "docs/format_spec.md",
+                       "docs/corpora.md",
+                       "test_small.bin"
+                   ]
+}

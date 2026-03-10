@@ -5,16 +5,16 @@
 - stride: 32
 
 ## Cube Descriptor Idealization Table
-| Mode | Total Bits | Bits/Source Bit | Compression Ratio | Avg Bits/Route | Delta vs cube_actual | Delta vs family_aware |
+| Mode | Total Bits | Bits/Source Bit | Compression Ratio | Avg Bits/Route | Delta vs cube_actual | Delta vs target_baseline |
 |---|---:|---:|---:|---:|---:|---:|
-| cube_actual | 322.00 | 0.1258 | 7.9503 | 23.0000 | 0.00 | 140.00 |
-| cube_fixed_length_optimized | 196.00 | 0.0766 | 13.0612 | 14.0000 | -126.00 | 14.00 |
-| cube_entropy_estimated.whole_route | 63.30 | 0.0247 | 40.4404 | 4.5216 | -258.70 | -118.70 |
-| cube_entropy_estimated.factorized | 63.30 | 0.0247 | 40.4404 | 4.5216 | -258.70 | -118.70 |
-| cube_family_local_id | 70.00 | 0.0273 | 36.5714 | 5.0000 | -252.00 | -112.00 |
-| cube_oracle_used_route | 63.30 | 0.0247 | 40.4404 | 4.5216 | -258.70 | -118.70 |
-| cube_oracle_region_local | 63.30 | 0.0247 | 40.4404 | 4.5216 | -258.70 | -118.70 |
-| cube_oracle_factorized | 63.30 | 0.0247 | 40.4404 | 4.5216 | -258.70 | -118.70 |
+| cube_actual | 322.00 | 0.1258 | 7.9503 | 23.0000 | 0.00 | -1582.00 |
+| cube_fixed_length_optimized | 196.00 | 0.0766 | 13.0612 | 14.0000 | -126.00 | -1708.00 |
+| cube_entropy_estimated.whole_route | 63.30 | 0.0247 | 40.4404 | 4.5216 | -258.70 | -1840.70 |
+| cube_entropy_estimated.factorized | 63.30 | 0.0247 | 40.4404 | 4.5216 | -258.70 | -1840.70 |
+| cube_family_local_id | 70.00 | 0.0273 | 36.5714 | 5.0000 | -252.00 | -1834.00 |
+| cube_oracle_used_route | 63.30 | 0.0247 | 40.4404 | 4.5216 | -258.70 | -1840.70 |
+| cube_oracle_region_local | 63.30 | 0.0247 | 40.4404 | 4.5216 | -258.70 | -1840.70 |
+| cube_oracle_factorized | 63.30 | 0.0247 | 40.4404 | 4.5216 | -258.70 | -1840.70 |
 
 ## Long-Phrase Regime Summary
 - fixed 128 results: available
@@ -59,10 +59,9 @@
 - best real cube mode: cube_family_local_id_actual
 - best_real_cube_minus_target_bits: -1664.0
 - descriptor_redesign_verdict: descriptor_redesign_fails
-- beats family-aware in any mode: True
+- any_real_cube_beats_target: True
 - best cube mode: cube_entropy_estimated.whole_route
 - final verdict: geometry_promising
-- long_phrase_any_real_cube_beats_family_aware: False
 - long_phrase_best_length_class: 256
 - long_phrase_verdict: long_phrases_marginal
 - scaling_any_real_cube_beats_target: True

@@ -109,7 +109,8 @@
         "compression_ratio": 7.950310559006211,
         "average_bits_per_route_token": 23.0,
         "delta_vs_cube_actual_bits": 0.0,
-        "delta_vs_family_aware_bits": 140.0
+        "delta_vs_family_aware_bits": 140.0,
+        "delta_vs_target_bits": -1582.0
       },
       "cube_fixed_length_optimized": {
         "total_estimated_compressed_bits": 196.0,
@@ -117,7 +118,8 @@
         "compression_ratio": 13.061224489795919,
         "average_bits_per_route_token": 14.0,
         "delta_vs_cube_actual_bits": -126.0,
-        "delta_vs_family_aware_bits": 14.0
+        "delta_vs_family_aware_bits": 14.0,
+        "delta_vs_target_bits": -1708.0
       },
       "cube_entropy_estimated.whole_route": {
         "total_estimated_compressed_bits": 63.30296890880646,
@@ -125,7 +127,8 @@
         "compression_ratio": 40.440441327292355,
         "average_bits_per_route_token": 4.521640636343319,
         "delta_vs_cube_actual_bits": -258.69703109119354,
-        "delta_vs_family_aware_bits": -118.69703109119354
+        "delta_vs_family_aware_bits": -118.69703109119354,
+        "delta_vs_target_bits": -1840.6970310911936
       },
       "cube_entropy_estimated.factorized": {
         "total_estimated_compressed_bits": 63.30296890880646,
@@ -133,7 +136,8 @@
         "compression_ratio": 40.440441327292355,
         "average_bits_per_route_token": 4.521640636343319,
         "delta_vs_cube_actual_bits": -258.69703109119354,
-        "delta_vs_family_aware_bits": -118.69703109119354
+        "delta_vs_family_aware_bits": -118.69703109119354,
+        "delta_vs_target_bits": -1840.6970310911936
       },
       "cube_family_local_id": {
         "total_estimated_compressed_bits": 70.0,
@@ -141,7 +145,8 @@
         "compression_ratio": 36.57142857142857,
         "average_bits_per_route_token": 5.0,
         "delta_vs_cube_actual_bits": -252.0,
-        "delta_vs_family_aware_bits": -112.0
+        "delta_vs_family_aware_bits": -112.0,
+        "delta_vs_target_bits": -1834.0
       },
       "cube_oracle_used_route": {
         "total_estimated_compressed_bits": 63.30296890880646,
@@ -149,7 +154,8 @@
         "compression_ratio": 40.440441327292355,
         "average_bits_per_route_token": 4.521640636343319,
         "delta_vs_cube_actual_bits": -258.69703109119354,
-        "delta_vs_family_aware_bits": -118.69703109119354
+        "delta_vs_family_aware_bits": -118.69703109119354,
+        "delta_vs_target_bits": -1840.6970310911936
       },
       "cube_oracle_region_local": {
         "total_estimated_compressed_bits": 63.30296890880646,
@@ -157,7 +163,8 @@
         "compression_ratio": 40.440441327292355,
         "average_bits_per_route_token": 4.521640636343319,
         "delta_vs_cube_actual_bits": -258.69703109119354,
-        "delta_vs_family_aware_bits": -118.69703109119354
+        "delta_vs_family_aware_bits": -118.69703109119354,
+        "delta_vs_target_bits": -1840.6970310911936
       },
       "cube_oracle_factorized": {
         "total_estimated_compressed_bits": 63.30296890880646,
@@ -165,7 +172,8 @@
         "compression_ratio": 40.440441327292355,
         "average_bits_per_route_token": 4.521640636343319,
         "delta_vs_cube_actual_bits": -258.69703109119354,
-        "delta_vs_family_aware_bits": -118.69703109119354
+        "delta_vs_family_aware_bits": -118.69703109119354,
+        "delta_vs_target_bits": -1840.6970310911936
       }
     },
     "biggest_overhead_source": "non-entropy-coded route usage",

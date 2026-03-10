@@ -41,15 +41,15 @@
 | Mode | Bits | Ratio |
 |---|---:|---:|
 | cube_best_real (cube_family_local_id_actual) | 240.0 | 10.6667 |
-| family_aware | 516 | 4.9612 |
+| family_aware | 196 | 13.0612 |
 | flat_dictionary | 140 | 18.2857 |
 | zlib | 1904 | 1.3445 |
 
 ## Baseline Comparison
 - raw_literals ratio: 0.8889
 - flat_dictionary ratio: 18.2857
-- family_aware ratio: 4.9612
-- phrase_family_oracle ratio: 17.9021
+- family_aware ratio: 13.0612
+- phrase_family_oracle ratio: 14.0659
 
 ## Decision
 - target baseline: zlib (1904.0 bits)
@@ -58,16 +58,16 @@
 - cube_entropy_coded_actual beats target: True
 - best real cube mode: cube_family_local_id_actual
 - best_real_cube_minus_target_bits: -1664.0
-- descriptor_redesign_verdict: descriptor_redesign_succeeds
+- descriptor_redesign_verdict: descriptor_redesign_fails
 - any_real_cube_beats_target: True
 - best cube mode: cube_entropy_estimated.whole_route
 - final verdict: geometry_promising
 - long_phrase_best_length_class: 256
-- long_phrase_verdict: long_phrases_promising
+- long_phrase_verdict: long_phrases_marginal
 - scaling_any_real_cube_beats_target: True
 - scaling_verdict: scaling_promising
 
 ## Recommendation
 - continue cube investigation
-- continue cube investigation
+- cube only worth pursuing if descriptor redesign is implemented
 - continue cube investigation
