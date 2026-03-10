@@ -2,8 +2,8 @@
   "runs": [
     {
       "corpus": "structured_synthetic",
-      "encode_mbps": 10.24820012417636,
-      "decode_mbps": 14.081403110759727,
+      "encode_mbps": 7.0181862043897185,
+      "decode_mbps": 13.918103610727607,
       "peak_memory_mb": 0.48525524139404297,
       "test_bits": 2560,
       "best_mode": "cube_family_local_id_actual",
@@ -11,21 +11,21 @@
     },
     {
       "corpus": "semi_structured_narrow",
-      "encode_mbps": 11.719561306027888,
-      "decode_mbps": 11.081845093044118,
+      "encode_mbps": 9.953922444553251,
+      "decode_mbps": 48.09708630498225,
       "peak_memory_mb": 38.054598808288574,
       "test_bits": 204504,
-      "best_mode": "cube_family_local_id_actual",
-      "compressed_bits": 78408
+      "best_mode": "cube_fixed_length_actual",
+      "compressed_bits": 58064
     },
     {
       "corpus": "mixed_general",
-      "encode_mbps": 10.478975751057005,
-      "decode_mbps": 9.659355648384345,
+      "encode_mbps": 11.174167937291667,
+      "decode_mbps": 51.11638938253134,
       "peak_memory_mb": 21.074520111083984,
       "test_bits": 112744,
-      "best_mode": "cube_family_local_id_actual",
-      "compressed_bits": 42832
+      "best_mode": "cube_fixed_length_actual",
+      "compressed_bits": 31944
     }
   ]
 }

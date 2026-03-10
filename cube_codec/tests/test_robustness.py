@@ -8,7 +8,14 @@ from cube_codec.region_builder import build_cube_model
 from cube_codec.route_index import build_prefix_index
 from cube_codec.route_model import LiteralToken
 from cube_codec.cost_model import build_token_cost_model
-from cube_codec.stream_codecs import FLAG_TOKEN_ZLIB, MODE_ENTROPY, MODE_LOCAL, decode_mode_stream, encode_mode_stream
+from cube_codec.stream_codecs import (
+    FLAG_LITERAL_ONLY_STREAM,
+    FLAG_TOKEN_ZLIB,
+    MODE_ENTROPY,
+    MODE_LOCAL,
+    decode_mode_stream,
+    encode_mode_stream,
+)
 
 
 def _simple_case():
@@ -59,5 +66,17 @@ def test_decode_rejects_invalid_token_zlib_flag() -> None:
     payload, _ = encode_mode_stream(stream, cube, MODE_LOCAL)
     bad = bytearray(payload)
     bad[13] = bad[13] | FLAG_TOKEN_ZLIB
+    with pytest.raises(Exception):
+        decode_mode_stream(bytes(bad), cube)
+
+
+def test_decode_rejects_corrupt_literal_only_payload() -> None:
+    cube, stream = _simple_case()
+    source_bits = "0101" * 1024
+    stream = stream.__class__(tokens=[LiteralToken(token_type="L", bit_length=len(source_bits), payload_bits=source_bits)], original_bit_length=len(source_bits))
+    payload, _ = encode_mode_stream(stream, cube, MODE_LOCAL)
+    bad = bytearray(payload)
+    bad[13] = bad[13] | FLAG_LITERAL_ONLY_STREAM
+    bad = bad[:-1]
     with pytest.raises(Exception):
         decode_mode_stream(bytes(bad), cube)

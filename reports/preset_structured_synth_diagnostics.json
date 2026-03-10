@@ -191,6 +191,7 @@
       "length_field_present": false,
       "route_only": true,
       "token_payload_zlib": false,
+      "literal_only_fast_path": false,
       "decoded_mode": "cube_fixed_length_actual"
     },
     "cube_family_local_id_actual": {
@@ -471,6 +472,7 @@
       "literal_count": 0,
       "token_payload_zlib": false,
       "route_only": true,
+      "literal_only_fast_path": false,
       "decoded_mode": "cube_family_local_id_actual"
     },
     "cube_entropy_coded_actual": {
@@ -481,6 +483,7 @@
       "literal_count": 0,
       "token_payload_zlib": false,
       "route_only": true,
+      "literal_only_fast_path": false,
       "decoded_mode": "cube_entropy_coded_actual"
     },
     "bits_saved_vs_legacy_fixed": 64,

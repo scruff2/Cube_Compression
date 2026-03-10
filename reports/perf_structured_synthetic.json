@@ -31,37 +31,37 @@
   "train_file": "v1_4_variable/train.bin",
   "test_file": "v1_4_variable/test.bin",
   "test_bits": 2560,
-  "base_encode_sec": 0.011656100396066904,
-  "base_decode_sec": 3.6699697375297546e-05,
+  "base_encode_sec": 0.011244799941778183,
+  "base_decode_sec": 3.719981759786606e-05,
   "peak_memory_bytes": 508827,
   "mode_results": {
     "cube_actual_legacy": {
       "compressed_bits": 424,
-      "avg_encode_sec": 5.733345945676168e-05,
-      "avg_decode_sec": 6.41333560148875e-05,
-      "encode_mbps": 44.65106456606961,
-      "decode_mbps": 39.91682579975603
+      "avg_encode_sec": 5.646655336022377e-05,
+      "avg_decode_sec": 6.316648796200752e-05,
+      "encode_mbps": 45.33657267282968,
+      "decode_mbps": 40.5278191426402
     },
     "cube_fixed_length_actual": {
       "compressed_bits": 360,
-      "avg_encode_sec": 7.846687609950702e-05,
-      "avg_decode_sec": 5.3633470088243484e-05,
-      "encode_mbps": 32.62523152767749,
-      "decode_mbps": 47.73138854875539
+      "avg_encode_sec": 0.00026780009890596074,
+      "avg_decode_sec": 5.536650617917379e-05,
+      "encode_mbps": 9.559369135628872,
+      "decode_mbps": 46.23734052705946
     },
     "cube_family_local_id_actual": {
       "compressed_bits": 304,
-      "avg_encode_sec": 0.0002497999618450801,
-      "avg_decode_sec": 0.0001818000649412473,
-      "encode_mbps": 10.24820012417636,
-      "decode_mbps": 14.081403110759727
+      "avg_encode_sec": 0.0003647666114072005,
+      "avg_decode_sec": 0.00018393310407797495,
+      "encode_mbps": 7.0181862043897185,
+      "decode_mbps": 13.918103610727607
     },
     "cube_entropy_coded_actual": {
       "compressed_bits": 920,
-      "avg_encode_sec": 7.643348847826321e-05,
-      "avg_decode_sec": 5.246652290225029e-05,
-      "encode_mbps": 33.49317231187261,
-      "decode_mbps": 48.79301806924586
+      "avg_encode_sec": 0.00022213347256183624,
+      "avg_decode_sec": 5.446669335166613e-05,
+      "encode_mbps": 11.52460262055896,
+      "decode_mbps": 47.00120096278416
     }
   }
 }

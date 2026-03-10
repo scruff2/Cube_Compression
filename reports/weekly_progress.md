@@ -99,3 +99,12 @@
 - Additional impact on best real mode (`cube_family_local_id_actual`):
   - semi-structured narrow: `190,568 -> 78,408` bits (nearer to zlib `57,920`)
   - mixed general: `94,952 -> 42,832` bits (nearer to zlib `31,800`)
+
+### Hybrid fast-path roadmap execution
+- Added `HYBRID_EXECUTION_ROADMAP.md` and completed all milestones.
+- Implemented stream-level literal-only fast path (`FLAG_LITERAL_ONLY_STREAM`) for real modes.
+- Added fast-path decode corruption checks and roundtrip coverage.
+- Validation update: `pytest -q` -> `31 passed`.
+- Latest best-real results:
+  - semi-structured narrow: `58,064` vs zlib `57,920` (delta `+144` bits)
+  - mixed general: `31,944` vs zlib `31,800` (delta `+144` bits)

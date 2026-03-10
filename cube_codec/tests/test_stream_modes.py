@@ -5,9 +5,11 @@ from cube_codec.encoder import encode_bits
 from cube_codec.region_builder import build_cube_model
 from cube_codec.route_index import build_prefix_index
 from cube_codec.cost_model import build_token_cost_model
+from cube_codec.route_model import EncodedStream, LiteralToken
 from cube_codec.stream_codecs import (
     FLAG_FRAMED_PAYLOAD,
     FLAG_LITERAL_ZLIB,
+    FLAG_LITERAL_ONLY_STREAM,
     MODE_ENTROPY,
     MODE_FIXED,
     MODE_LEGACY,
@@ -87,8 +89,21 @@ def test_modes_roundtrip_with_literals_uses_framed_literal_payload() -> None:
     for mode in [MODE_FIXED, MODE_LOCAL, MODE_ENTROPY]:
         payload, _ = encode_mode_stream(stream, cube, mode)
         flags = payload[13]
-        assert flags & FLAG_FRAMED_PAYLOAD
-        assert flags & FLAG_LITERAL_ZLIB
+        assert (flags & FLAG_FRAMED_PAYLOAD) or (flags & FLAG_LITERAL_ONLY_STREAM)
+        if flags & FLAG_FRAMED_PAYLOAD:
+            assert flags & FLAG_LITERAL_ZLIB
         decoded_stream, decoded_mode = decode_mode_stream(payload, cube)
         assert decoded_mode == mode
         assert decode_stream(decoded_stream, cube) == source
+
+
+def test_literal_only_fast_path_roundtrip() -> None:
+    cfg, cube, _source, _stream = _simple_case()
+    source = "0011" * 2048
+    stream = EncodedStream(tokens=[LiteralToken(token_type="L", bit_length=len(source), payload_bits=source)], original_bit_length=len(source))
+    payload, _ = encode_mode_stream(stream, cube, MODE_LOCAL)
+    flags = payload[13]
+    assert flags & FLAG_LITERAL_ONLY_STREAM
+    decoded_stream, mode = decode_mode_stream(payload, cube)
+    assert mode == MODE_LOCAL
+    assert decode_stream(decoded_stream, cube) == source
