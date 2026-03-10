@@ -91,3 +91,11 @@
 - Impact on best real mode (`cube_family_local_id_actual`):
   - semi-structured narrow: `261,464 -> 190,568` bits (improved, still above zlib `57,920`)
   - mixed general: `125,160 -> 94,952` bits (improved, still above zlib `31,800`)
+
+### Descriptor redesign experiment: token-side compression
+- Added optional zlib compression for framed token payloads (`FLAG_TOKEN_ZLIB`) in fixed/local/entropy real modes.
+- Added robustness test for invalid token-zlib flag/data combinations.
+- Validation update: `pytest -q` -> `29 passed`.
+- Additional impact on best real mode (`cube_family_local_id_actual`):
+  - semi-structured narrow: `190,568 -> 78,408` bits (nearer to zlib `57,920`)
+  - mixed general: `94,952 -> 42,832` bits (nearer to zlib `31,800`)

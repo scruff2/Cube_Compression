@@ -1368,6 +1368,7 @@
     "cube_fixed_length_actual": {
       "length_field_present": false,
       "route_only": false,
+      "token_payload_zlib": true,
       "decoded_mode": "cube_fixed_length_actual"
     },
     "cube_family_local_id_actual": {
@@ -3154,6 +3155,7 @@
       "max_local_id_width": 10,
       "avg_local_id_width": 0.5025323579065841,
       "literal_count": 14348,
+      "token_payload_zlib": true,
       "route_only": false,
       "decoded_mode": "cube_family_local_id_actual"
     },
@@ -3161,15 +3163,16 @@
       "coding_model": "whole_route_huffman_static_canonical",
       "symbol_alphabet_size": 450,
       "estimated_entropy_bits_per_route": 8.357826626306085,
-      "actual_coded_bits": 210176,
+      "actual_coded_bits": 100352,
       "literal_count": 14348,
+      "token_payload_zlib": true,
       "route_only": false,
       "decoded_mode": "cube_entropy_coded_actual"
     },
-    "bits_saved_vs_legacy_fixed": 80336,
+    "bits_saved_vs_legacy_fixed": 198112,
     "mode_vs_v12_estimate_gap": {
-      "cube_fixed_length_actual_minus_v12": 44302.0,
-      "cube_entropy_coded_actual_minus_v12_factorized": 69727.91462314379
+      "cube_fixed_length_actual_minus_v12": -73474.0,
+      "cube_entropy_coded_actual_minus_v12_factorized": -40096.08537685621
     }
   },
   "length_aware_diagnostics": {
@@ -3692,7 +3695,7 @@
     },
     "comparative_diagnostics": {
       "best_real_cube_mode": "cube_family_local_id_actual",
-      "best_real_cube_bits": 190568.0,
+      "best_real_cube_bits": 78408.0,
       "family_aware_bits": 164307,
       "flat_dictionary_bits": 143874,
       "general_purpose_bits": 57920
@@ -3752,25 +3755,25 @@
     "final_verdict": "geometry_promising",
     "recommendation": "continue cube investigation",
     "best_real_cube_mode": "cube_family_local_id_actual",
-    "best_real_cube_minus_family_aware_bits": 26261.0,
-    "descriptor_redesign_verdict": "descriptor_redesign_fails",
+    "best_real_cube_minus_family_aware_bits": -85899.0,
+    "descriptor_redesign_verdict": "descriptor_redesign_succeeds",
     "long_phrase_best_real_cube_mode": "cube_family_local_id_actual",
-    "long_phrase_best_real_cube_bits": 190568.0,
-    "long_phrase_best_real_cube_minus_family_aware_bits": 26261.0,
-    "long_phrase_any_real_cube_beats_family_aware": false,
+    "long_phrase_best_real_cube_bits": 78408.0,
+    "long_phrase_best_real_cube_minus_family_aware_bits": -85899.0,
+    "long_phrase_any_real_cube_beats_family_aware": true,
     "long_phrase_best_length_class": "64",
-    "long_phrase_verdict": "long_phrases_not_helping",
-    "long_phrase_recommendation": "pivot away from cube descriptor path",
+    "long_phrase_verdict": "long_phrases_promising",
+    "long_phrase_recommendation": "continue cube investigation",
     "scaling_train_bits": 500728,
     "scaling_cube_payload_bits": 201744,
     "scaling_region_count": 1777,
     "scaling_best_real_cube_mode": "cube_family_local_id_actual",
-    "scaling_best_real_cube_bits": 190568.0,
-    "scaling_best_real_cube_minus_family_aware_bits": 26261.0,
-    "scaling_any_real_cube_beats_family_aware": false,
+    "scaling_best_real_cube_bits": 78408.0,
+    "scaling_best_real_cube_minus_family_aware_bits": -85899.0,
+    "scaling_any_real_cube_beats_family_aware": true,
     "target_baseline": "zlib",
     "target_baseline_bits": 57920.0,
-    "best_real_cube_minus_target_bits": 132648.0,
+    "best_real_cube_minus_target_bits": 20488.0,
     "any_real_cube_beats_target": false,
     "scaling_any_real_cube_beats_target": false,
     "scaling_average_route_emitted_bits": 73.34306569343066,

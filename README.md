@@ -106,7 +106,7 @@ flowchart LR
 ## Latest Test Results
 
 - Command: `pytest -q`
-- Result: `28 passed`
+- Result: `29 passed`
 
 ## Test Description and Outcomes
 
@@ -168,9 +168,9 @@ Expected best-real-mode ratio by corpus family (higher is better):
 
 | Corpus family | Cube best real ratio | zlib ratio | lzma ratio | Outcome |
 |---|---:|---:|---:|---|
-| structured synthetic | `10.6667` | `1.3445` | `1.0667` | cube wins |
-| semi-structured narrow | `1.0731` | `3.5308` | `3.7264` | cube loses |
-| mixed general | `1.1874` | `3.5454` | `3.6062` | cube loses |
+| structured synthetic | `8.4211` | `1.3445` | `1.0667` | cube wins |
+| semi-structured narrow | `2.6082` | `3.5308` | `3.7264` | cube loses (gap reduced) |
+| mixed general | `2.6322` | `3.5454` | `3.6062` | cube loses (gap reduced) |
 
 Interpretation:
 - Compression is currently niche-strong only on synthetic-structured data.
@@ -185,7 +185,7 @@ xychart-beta
     title "Best Real Mode Bits vs zlib (Lower is Better)"
     x-axis [synthetic, semi_structured, mixed_general]
     y-axis "bits" 0 --> 280000
-    bar [304, 190568, 94952]
+    bar [304, 78408, 42832]
     bar [1904, 57920, 31800]
 ```
 
@@ -196,7 +196,7 @@ xychart-beta
     title "Best Real Compression Ratio vs zlib"
     x-axis [synthetic, semi_structured, mixed_general]
     y-axis "ratio" 0 --> 12
-    line [8.4211, 1.0731, 1.1874]
+    line [8.4211, 2.6082, 2.6322]
     line [1.3445, 3.5308, 3.5454]
 ```
 

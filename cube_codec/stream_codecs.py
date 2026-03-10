@@ -12,6 +12,7 @@ MAGIC = b"CCM2"
 FLAG_ROUTE_ONLY = 1
 FLAG_LITERAL_ZLIB = 2
 FLAG_FRAMED_PAYLOAD = 4
+FLAG_TOKEN_ZLIB = 8
 
 MODE_LEGACY = "cube_actual_legacy"
 MODE_FIXED = "cube_fixed_length_actual"
@@ -196,7 +197,7 @@ def _decode_legacy(payload: bytes, token_count: int, original_bit_length: int, c
     return EncodedStream(tokens=tokens, original_bit_length=original_bit_length)
 
 
-def _encode_fixed(stream: EncodedStream, cube: CubeModel) -> tuple[bytes, EncodedStream, bool]:
+def _encode_fixed(stream: EncodedStream, cube: CubeModel) -> tuple[bytes, EncodedStream, bool, dict]:
     fixed_stream = _full_route_stream(stream, cube)
     route_only = all(isinstance(t, RouteToken) for t in fixed_stream.tokens)
     writer = BitWriter()
@@ -215,8 +216,8 @@ def _encode_fixed(stream: EncodedStream, cube: CubeModel) -> tuple[bytes, Encode
             writer.write_bits(token.region_id, r_bits)
             writer.write_bits(token.middle_id, m_bits)
             writer.write_bits(token.suffix_id, s_bits)
-    payload = _build_framed_payload(writer.to_bytes(), literal_writer, literal_count)
-    return payload, fixed_stream, route_only
+    payload, frame_diag = _build_framed_payload(writer.to_bytes(), literal_writer, literal_count)
+    return payload, fixed_stream, route_only, frame_diag
 
 
 def _decode_fixed(payload: bytes, token_count: int, original_bit_length: int, cube: CubeModel, route_only: bool, flags: int) -> EncodedStream:
@@ -260,13 +261,14 @@ def _encode_local(stream: EncodedStream, cube: CubeModel) -> tuple[bytes, Encode
             writer.write_bits(token.region_id, r_bits)
             local_id = forward[token.region_id][(token.middle_id, token.suffix_id)]
             writer.write_bits(local_id, widths[token.region_id])
-    payload = _build_framed_payload(writer.to_bytes(), literal_writer, literal_count)
+    payload, frame_diag = _build_framed_payload(writer.to_bytes(), literal_writer, literal_count)
     diagnostics = {
         "region_id_width": r_bits,
         "local_route_table_size_per_region": {str(k): len(v) for k, v in forward.items()},
         "max_local_id_width": max(widths.values()) if widths else 0,
         "avg_local_id_width": (sum(widths.values()) / max(1, len(widths))),
         "literal_count": literal_count,
+        "token_payload_zlib": frame_diag["token_payload_zlib"],
     }
     return payload, local_stream, diagnostics, route_only
 
@@ -326,7 +328,8 @@ def _encode_entropy(stream: EncodedStream, cube: CubeModel) -> tuple[bytes, Enco
     for sym in sorted(codes):
         r, m, s = sym
         table += struct.pack("<HHHB", r, m, s, lengths[sym])
-    payload = bytes(table) + _build_framed_payload(writer.to_bytes(), literal_writer, literal_count)
+    framed_payload, frame_diag = _build_framed_payload(writer.to_bytes(), literal_writer, literal_count)
+    payload = bytes(table) + framed_payload
 
     entropy = 0.0
     total = sum(route_freq.values())
@@ -341,6 +344,7 @@ def _encode_entropy(stream: EncodedStream, cube: CubeModel) -> tuple[bytes, Enco
         "estimated_entropy_bits_per_route": entropy,
         "actual_coded_bits": len(payload) * 8,
         "literal_count": literal_count,
+        "token_payload_zlib": frame_diag["token_payload_zlib"],
     }
     return payload, entropy_stream, diagnostics, route_only
 
@@ -397,13 +401,21 @@ class _LiteralSource:
             raise ValueError("unused literal payload bits")
 
 
-def _build_framed_payload(token_payload: bytes, literal_writer: BitWriter, literal_count: int) -> bytes:
+def _build_framed_payload(token_payload: bytes, literal_writer: BitWriter, literal_count: int) -> tuple[bytes, dict]:
+    token_blob = token_payload
+    token_payload_zlib = False
+    token_compressed = zlib.compress(token_payload)
+    if len(token_compressed) < len(token_payload):
+        token_blob = token_compressed
+        token_payload_zlib = True
     literal_bits = "".join(literal_writer.bits)
     if literal_count == 0:
-        return struct.pack("<II", len(token_payload), 0) + token_payload
+        payload = struct.pack("<II", len(token_blob), 0) + token_blob
+        return payload, {"token_payload_zlib": token_payload_zlib, "literal_payload_zlib": False}
     literal_bytes = literal_writer.to_bytes()
     literal_blob = struct.pack("<I", len(literal_bits)) + zlib.compress(literal_bytes)
-    return struct.pack("<II", len(token_payload), len(literal_blob)) + token_payload + literal_blob
+    payload = struct.pack("<II", len(token_blob), len(literal_blob)) + token_blob + literal_blob
+    return payload, {"token_payload_zlib": token_payload_zlib, "literal_payload_zlib": True}
 
 
 def _decode_framed_payload(payload: bytes, flags: int) -> tuple[bytes, _LiteralSource | None]:
@@ -416,8 +428,15 @@ def _decode_framed_payload(payload: bytes, flags: int) -> tuple[bytes, _LiteralS
     if token_len + literal_len + 8 != len(mv):
         raise ValueError("corrupt framed payload sizes")
     off = 8
-    token_payload = bytes(mv[off : off + token_len])
+    token_blob = bytes(mv[off : off + token_len])
     off += token_len
+    if flags & FLAG_TOKEN_ZLIB:
+        try:
+            token_payload = zlib.decompress(token_blob)
+        except Exception as exc:
+            raise ValueError("corrupt token payload") from exc
+    else:
+        token_payload = token_blob
     if literal_len == 0:
         return token_payload, None
     literal_blob = bytes(mv[off : off + literal_len])
@@ -444,16 +463,20 @@ def encode_mode_stream(stream: EncodedStream, cube: CubeModel, mode: str) -> tup
         normalized = stream
         diag = {"length_field_present": True, "route_only": False}
     elif mode == MODE_FIXED:
-        payload, normalized, route_only = _encode_fixed(stream, cube)
+        payload, normalized, route_only, frame_diag = _encode_fixed(stream, cube)
         flags |= FLAG_FRAMED_PAYLOAD
+        if frame_diag["token_payload_zlib"]:
+            flags |= FLAG_TOKEN_ZLIB
         if any(isinstance(t, LiteralToken) for t in normalized.tokens):
             flags |= FLAG_LITERAL_ZLIB
         if route_only:
             flags |= FLAG_ROUTE_ONLY
-        diag = {"length_field_present": False, "route_only": route_only}
+        diag = {"length_field_present": False, "route_only": route_only, "token_payload_zlib": frame_diag["token_payload_zlib"]}
     elif mode == MODE_LOCAL:
         payload, normalized, diag, route_only = _encode_local(stream, cube)
         flags |= FLAG_FRAMED_PAYLOAD
+        if diag.get("token_payload_zlib"):
+            flags |= FLAG_TOKEN_ZLIB
         if any(isinstance(t, LiteralToken) for t in normalized.tokens):
             flags |= FLAG_LITERAL_ZLIB
         if route_only:
@@ -462,6 +485,8 @@ def encode_mode_stream(stream: EncodedStream, cube: CubeModel, mode: str) -> tup
     else:
         payload, normalized, diag, route_only = _encode_entropy(stream, cube)
         flags |= FLAG_FRAMED_PAYLOAD
+        if diag.get("token_payload_zlib"):
+            flags |= FLAG_TOKEN_ZLIB
         if any(isinstance(t, LiteralToken) for t in normalized.tokens):
             flags |= FLAG_LITERAL_ZLIB
         if route_only:
