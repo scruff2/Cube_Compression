@@ -31,36 +31,36 @@
   "train_file": "v1_4_variable/train.bin",
   "test_file": "v1_4_variable/test.bin",
   "test_bits": 2560,
-  "base_encode_sec": 0.011289900168776512,
-  "base_decode_sec": 3.589969128370285e-05,
+  "base_encode_sec": 0.013770900201052427,
+  "base_decode_sec": 3.829970955848694e-05,
   "peak_memory_bytes": 508827,
   "mode_results": {
     "cube_actual_legacy": {
       "compressed_bits": 424,
-      "avg_encode_sec": 5.4899913569291435e-05,
-      "avg_decode_sec": 6.436665231982867e-05,
-      "encode_mbps": 46.63031020566032,
-      "decode_mbps": 39.77214765310035
+      "avg_encode_sec": 5.520010987917582e-05,
+      "avg_decode_sec": 6.21667131781578e-05,
+      "encode_mbps": 46.376719278338925,
+      "decode_mbps": 41.17959385537295
     },
     "cube_fixed_length_actual": {
-      "compressed_bits": 360,
-      "avg_encode_sec": 0.00017220014706254005,
-      "avg_decode_sec": 5.503324791789055e-05,
-      "encode_mbps": 14.866421682382496,
-      "decode_mbps": 46.51733446333229
+      "compressed_bits": 376,
+      "avg_encode_sec": 0.00020916666835546494,
+      "avg_decode_sec": 5.776667967438698e-05,
+      "encode_mbps": 12.23904372588394,
+      "decode_mbps": 44.31620467767809
     },
     "cube_family_local_id_actual": {
-      "compressed_bits": 304,
-      "avg_encode_sec": 0.00032603337119023007,
-      "avg_decode_sec": 0.00018073323493202528,
-      "encode_mbps": 7.851956965798823,
-      "decode_mbps": 14.164522651093085
+      "compressed_bits": 320,
+      "avg_encode_sec": 0.0003062332980334759,
+      "avg_decode_sec": 0.00017880011970798174,
+      "encode_mbps": 8.359639583413799,
+      "decode_mbps": 14.317663792289508
     },
     "cube_entropy_coded_actual": {
-      "compressed_bits": 920,
-      "avg_encode_sec": 0.00017473334446549416,
+      "compressed_bits": 936,
+      "avg_encode_sec": 0.00016943318769335747,
       "avg_decode_sec": 5.579988161722819e-05,
-      "encode_mbps": 14.650895670949293,
+      "encode_mbps": 15.109200475134326,
       "decode_mbps": 45.8782335339149
     }
   }

@@ -33,14 +33,14 @@
 
 ## Real Descriptor-Coding Modes
 - cube_actual_legacy: bits=424, ratio=6.0377, decode_success=True
-- cube_fixed_length_actual: bits=360, ratio=7.1111, decode_success=True
-- cube_family_local_id_actual: bits=304, ratio=8.4211, decode_success=True
-- cube_entropy_coded_actual: bits=920, ratio=2.7826, decode_success=True
+- cube_fixed_length_actual: bits=376, ratio=6.8085, decode_success=True
+- cube_family_local_id_actual: bits=320, ratio=8.0000, decode_success=True
+- cube_entropy_coded_actual: bits=936, ratio=2.7350, decode_success=True
 
 ## Comparative Baseline Table
 | Mode | Bits | Ratio |
 |---|---:|---:|
-| cube_best_real (cube_family_local_id_actual) | 304.0 | 8.4211 |
+| cube_best_real (cube_family_local_id_actual) | 320.0 | 8.0000 |
 | family_aware | 196 | 13.0612 |
 | flat_dictionary | 140 | 18.2857 |
 | zlib | 1904 | 1.3445 |
@@ -57,7 +57,7 @@
 - cube_family_local_id_actual beats target: True
 - cube_entropy_coded_actual beats target: True
 - best real cube mode: cube_family_local_id_actual
-- best_real_cube_minus_target_bits: -1600.0
+- best_real_cube_minus_target_bits: -1584.0
 - descriptor_redesign_verdict: descriptor_redesign_fails
 - any_real_cube_beats_target: True
 - best cube mode: cube_entropy_estimated.whole_route

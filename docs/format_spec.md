@@ -26,6 +26,21 @@ When literal-only fast path wins, stream payload may use compact container:
 
 Decoder reconstructs a single literal token stream with exact original bit length.
 
+## Chunked hybrid container
+
+`CCM3` supports per-chunk representation choice:
+
+- container header:
+  - magic: `CCM3`
+  - mode id (`fixed`/`local`/`entropy`)
+  - original bit length
+  - chunk count (varint)
+- chunk record:
+  - tag `0`: route-coded chunk
+  - tag `1`: literal-only chunk
+
+Each chunk carries its own bit length and payload length, and route chunks carry flags needed for framed decode.
+
 ## Framed payloads (fixed/local/entropy modes)
 
 For non-legacy real modes, payloads are framed as:

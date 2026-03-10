@@ -11,6 +11,7 @@ from .route_model import EncodedStream, LiteralToken, RouteToken
 
 MAGIC = b"CCM2"
 MAGIC_LITERAL = b"CCL1"
+MAGIC_CHUNKED = b"CCM3"
 FLAG_ROUTE_ONLY = 1
 FLAG_LITERAL_ZLIB = 2
 FLAG_FRAMED_PAYLOAD = 4
@@ -528,62 +529,192 @@ def _decode_literal_stream_payload(payload: bytes, original_bit_length: int, met
     return EncodedStream(tokens=[LiteralToken(token_type="L", bit_length=original_bit_length, payload_bits=out_bits)], original_bit_length=original_bit_length)
 
 
+def _token_emitted_bits(token: LiteralToken | RouteToken, cube: CubeModel) -> int:
+    if isinstance(token, LiteralToken):
+        return token.bit_length
+    if token.emit_length is not None:
+        return token.emit_length
+    region = cube.regions[token.region_id]
+    return region.route_length
+
+
+def _split_tokens_by_emitted_bits(tokens: list[LiteralToken | RouteToken], cube: CubeModel, target_bits: int = 524288) -> list[list[LiteralToken | RouteToken]]:
+    chunks: list[list[LiteralToken | RouteToken]] = []
+    cur: list[LiteralToken | RouteToken] = []
+    cur_bits = 0
+    for t in tokens:
+        b = _token_emitted_bits(t, cube)
+        if cur and cur_bits + b > target_bits:
+            chunks.append(cur)
+            cur = []
+            cur_bits = 0
+        cur.append(t)
+        cur_bits += b
+    if cur:
+        chunks.append(cur)
+    return chunks
+
+
+def _encode_route_chunk_for_mode(mode: str, chunk_stream: EncodedStream, cube: CubeModel) -> tuple[bytes, int, int]:
+    if mode == MODE_FIXED:
+        payload, normalized, route_only, frame_diag = _encode_fixed(chunk_stream, cube)
+        flags = FLAG_FRAMED_PAYLOAD
+        if route_only:
+            flags |= FLAG_ROUTE_ONLY
+        if frame_diag.get("token_payload_zlib"):
+            flags |= FLAG_TOKEN_ZLIB
+        if any(isinstance(t, LiteralToken) for t in normalized.tokens):
+            flags |= FLAG_LITERAL_ZLIB
+        return payload, flags, len(normalized.tokens)
+    if mode == MODE_LOCAL:
+        payload, normalized, diag, route_only = _encode_local(chunk_stream, cube)
+        flags = FLAG_FRAMED_PAYLOAD
+        if route_only:
+            flags |= FLAG_ROUTE_ONLY
+        if diag.get("token_payload_zlib"):
+            flags |= FLAG_TOKEN_ZLIB
+        if any(isinstance(t, LiteralToken) for t in normalized.tokens):
+            flags |= FLAG_LITERAL_ZLIB
+        return payload, flags, len(normalized.tokens)
+    payload, normalized, diag, route_only = _encode_entropy(chunk_stream, cube)
+    flags = FLAG_FRAMED_PAYLOAD
+    if route_only:
+        flags |= FLAG_ROUTE_ONLY
+    if diag.get("token_payload_zlib"):
+        flags |= FLAG_TOKEN_ZLIB
+    if any(isinstance(t, LiteralToken) for t in normalized.tokens):
+        flags |= FLAG_LITERAL_ZLIB
+    return payload, flags, len(normalized.tokens)
+
+
+def _encode_chunked_hybrid(stream: EncodedStream, cube: CubeModel, mode: str) -> tuple[bytes, dict]:
+    normalized = _full_route_stream(stream, cube)
+    chunks = _split_tokens_by_emitted_bits(normalized.tokens, cube, target_bits=524288)
+    out = bytearray()
+    out += MAGIC_CHUNKED
+    out += struct.pack("<BI", MODE_IDS[mode], normalized.original_bit_length)
+    out += _encode_varint(len(chunks))
+
+    route_chunks = 0
+    literal_chunks = 0
+    for tokens in chunks:
+        chunk_bits = sum(_token_emitted_bits(t, cube) for t in tokens)
+        chunk_stream = EncodedStream(tokens=tokens, original_bit_length=chunk_bits)
+
+        route_payload, route_flags, route_token_count = _encode_route_chunk_for_mode(mode, chunk_stream, cube)
+        route_record = bytearray()
+        route_record += b"\x00"
+        route_record += _encode_varint(chunk_bits)
+        route_record += struct.pack("<B", route_flags)
+        route_record += _encode_varint(route_token_count)
+        route_record += _encode_varint(len(route_payload))
+        route_record += route_payload
+
+        literal_payload, literal_method = _build_literal_stream_payload(chunk_stream, cube)
+        literal_record = bytearray()
+        literal_record += b"\x01"
+        literal_record += _encode_varint(chunk_bits)
+        literal_record += struct.pack("<B", literal_method)
+        literal_record += _encode_varint(len(literal_payload))
+        literal_record += literal_payload
+
+        if len(literal_record) < len(route_record):
+            out += literal_record
+            literal_chunks += 1
+        else:
+            out += route_record
+            route_chunks += 1
+
+    diag = {
+        "container": "CCM3",
+        "chunk_count": len(chunks),
+        "route_chunks": route_chunks,
+        "literal_chunks": literal_chunks,
+        "literal_chunk_fraction": (literal_chunks / max(1, len(chunks))),
+    }
+    return bytes(out), diag
+
+
+def _decode_chunked_hybrid(data: bytes, cube: CubeModel) -> tuple[EncodedStream, str]:
+    mv = memoryview(data)
+    off = 4
+    mode_id, original_bits = struct.unpack_from("<BI", mv, off)
+    off += 5
+    if mode_id not in ID_TO_MODE:
+        raise ValueError("unsupported chunked mode id")
+    mode = ID_TO_MODE[mode_id]
+    chunk_count, off = _decode_varint(mv, off)
+
+    tokens: list[LiteralToken | RouteToken] = []
+    total_bits = 0
+    for _ in range(chunk_count):
+        if off >= len(mv):
+            raise ValueError("corrupt chunked payload")
+        tag = int(mv[off])
+        off += 1
+        chunk_bits, off = _decode_varint(mv, off)
+        total_bits += chunk_bits
+        if tag == 0:
+            if off >= len(mv):
+                raise ValueError("corrupt route chunk")
+            flags = int(mv[off])
+            off += 1
+            token_count, off = _decode_varint(mv, off)
+            payload_len, off = _decode_varint(mv, off)
+            if off + payload_len > len(mv):
+                raise ValueError("corrupt route chunk length")
+            payload = bytes(mv[off : off + payload_len])
+            off += payload_len
+            route_only = bool(flags & FLAG_ROUTE_ONLY)
+            if mode == MODE_FIXED:
+                chunk_stream = _decode_fixed(payload, token_count, chunk_bits, cube, route_only, flags)
+            elif mode == MODE_LOCAL:
+                chunk_stream = _decode_local(payload, token_count, chunk_bits, cube, route_only, flags)
+            else:
+                chunk_stream = _decode_entropy(payload, token_count, chunk_bits, cube, route_only, flags)
+            tokens.extend(chunk_stream.tokens)
+        elif tag == 1:
+            if off >= len(mv):
+                raise ValueError("corrupt literal chunk")
+            method = int(mv[off])
+            off += 1
+            payload_len, off = _decode_varint(mv, off)
+            if off + payload_len > len(mv):
+                raise ValueError("corrupt literal chunk length")
+            payload = bytes(mv[off : off + payload_len])
+            off += payload_len
+            chunk_stream = _decode_literal_stream_payload(payload, chunk_bits, method)
+            tokens.extend(chunk_stream.tokens)
+        else:
+            raise ValueError("unsupported chunk tag")
+
+    if total_bits != original_bits:
+        raise ValueError("chunk bit length mismatch")
+    return EncodedStream(tokens=tokens, original_bit_length=original_bits), mode
+
+
 def encode_mode_stream(stream: EncodedStream, cube: CubeModel, mode: str) -> tuple[bytes, dict]:
     if mode not in MODE_IDS:
         raise ValueError(f"unsupported mode: {mode}")
 
-    flags = 0
     if mode == MODE_LEGACY:
         payload = _encode_legacy(stream, cube)
         normalized = stream
         diag = {"length_field_present": True, "route_only": False}
-    elif mode == MODE_FIXED:
-        payload, normalized, route_only, frame_diag = _encode_fixed(stream, cube)
-        flags |= FLAG_FRAMED_PAYLOAD
-        if frame_diag["token_payload_zlib"]:
-            flags |= FLAG_TOKEN_ZLIB
-        if any(isinstance(t, LiteralToken) for t in normalized.tokens):
-            flags |= FLAG_LITERAL_ZLIB
-        if route_only:
-            flags |= FLAG_ROUTE_ONLY
-        diag = {"length_field_present": False, "route_only": route_only, "token_payload_zlib": frame_diag["token_payload_zlib"]}
-    elif mode == MODE_LOCAL:
-        payload, normalized, diag, route_only = _encode_local(stream, cube)
-        flags |= FLAG_FRAMED_PAYLOAD
-        if diag.get("token_payload_zlib"):
-            flags |= FLAG_TOKEN_ZLIB
-        if any(isinstance(t, LiteralToken) for t in normalized.tokens):
-            flags |= FLAG_LITERAL_ZLIB
-        if route_only:
-            flags |= FLAG_ROUTE_ONLY
-        diag = diag | {"route_only": route_only}
-    else:
-        payload, normalized, diag, route_only = _encode_entropy(stream, cube)
-        flags |= FLAG_FRAMED_PAYLOAD
-        if diag.get("token_payload_zlib"):
-            flags |= FLAG_TOKEN_ZLIB
-        if any(isinstance(t, LiteralToken) for t in normalized.tokens):
-            flags |= FLAG_LITERAL_ZLIB
-        if route_only:
-            flags |= FLAG_ROUTE_ONLY
-        diag = diag | {"route_only": route_only}
+        flags = 0
+        header = bytearray()
+        header += MAGIC
+        header += struct.pack("<BIIB", MODE_IDS[mode], normalized.original_bit_length, len(normalized.tokens), flags)
+        return bytes(header) + payload, diag
 
-    if mode in {MODE_FIXED, MODE_LOCAL, MODE_ENTROPY}:
-        literal_only_payload, literal_method = _build_literal_stream_payload(normalized, cube)
-        compact_meta = (MODE_IDS[mode] & 0x03) | ((literal_method & 0x03) << 2)
-        compact = MAGIC_LITERAL + bytes([compact_meta]) + _encode_varint(normalized.original_bit_length) + literal_only_payload
-        if len(compact) < (4 + 10 + len(payload)):
-            return compact, diag | {"literal_only_fast_path": True, "literal_only_method": literal_method}
-        diag = diag | {"literal_only_fast_path": False}
-
-    header = bytearray()
-    header += MAGIC
-    header += struct.pack("<BIIB", MODE_IDS[mode], normalized.original_bit_length, len(normalized.tokens), flags)
-    return bytes(header) + payload, diag
+    return _encode_chunked_hybrid(stream, cube, mode)
 
 
 def decode_mode_stream(data: bytes, cube: CubeModel) -> tuple[EncodedStream, str]:
     mv = memoryview(data)
+    if bytes(mv[:4]) == MAGIC_CHUNKED:
+        return _decode_chunked_hybrid(data, cube)
+
     if bytes(mv[:4]) == MAGIC_LITERAL:
         if len(mv) < 5:
             raise ValueError("corrupt literal-only header")

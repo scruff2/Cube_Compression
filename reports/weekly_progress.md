@@ -116,3 +116,12 @@
 - Latest best-real results:
   - semi-structured narrow: `57,800` vs zlib `57,920` (delta `-120` bits)
   - mixed general: `31,792` vs zlib `31,800` (delta `-8` bits)
+
+### Chunk-level hybrid execution
+- Added `CCM3` chunked hybrid container with per-chunk route-vs-literal choice.
+- Preserved backward decode compatibility for `CCM2` and `CCL1`.
+- Tuned default chunk target to avoid context fragmentation regressions.
+- Validation: `pytest -q` -> `31 passed`.
+- Latest best-real results:
+  - semi-structured narrow: `57,872` vs zlib `57,920` (delta `-48` bits)
+  - mixed general: `31,864` vs zlib `31,800` (delta `+64` bits)

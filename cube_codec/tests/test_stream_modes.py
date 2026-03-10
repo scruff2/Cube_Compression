@@ -10,6 +10,7 @@ from cube_codec.stream_codecs import (
     FLAG_FRAMED_PAYLOAD,
     FLAG_LITERAL_ZLIB,
     FLAG_LITERAL_ONLY_STREAM,
+    MAGIC_CHUNKED,
     MAGIC_LITERAL,
     MODE_ENTROPY,
     MODE_FIXED,
@@ -89,7 +90,7 @@ def test_modes_roundtrip_with_literals_uses_framed_literal_payload() -> None:
 
     for mode in [MODE_FIXED, MODE_LOCAL, MODE_ENTROPY]:
         payload, _ = encode_mode_stream(stream, cube, mode)
-        if payload.startswith(MAGIC_LITERAL):
+        if payload.startswith(MAGIC_LITERAL) or payload.startswith(MAGIC_CHUNKED):
             pass
         else:
             flags = payload[13]
@@ -106,8 +107,7 @@ def test_literal_only_fast_path_roundtrip() -> None:
     source = "0011" * 2048
     stream = EncodedStream(tokens=[LiteralToken(token_type="L", bit_length=len(source), payload_bits=source)], original_bit_length=len(source))
     payload, _ = encode_mode_stream(stream, cube, MODE_LOCAL)
-    flags = payload[13]
-    assert flags & FLAG_LITERAL_ONLY_STREAM
+    assert payload.startswith(MAGIC_LITERAL) or payload.startswith(MAGIC_CHUNKED)
     decoded_stream, mode = decode_mode_stream(payload, cube)
     assert mode == MODE_LOCAL
     assert decode_stream(decoded_stream, cube) == source

@@ -82,8 +82,6 @@ def test_decode_rejects_corrupt_literal_only_payload() -> None:
     source_bits = "0101" * 1024
     stream = stream.__class__(tokens=[LiteralToken(token_type="L", bit_length=len(source_bits), payload_bits=source_bits)], original_bit_length=len(source_bits))
     payload, _ = encode_mode_stream(stream, cube, MODE_LOCAL)
-    bad = bytearray(payload)
-    bad[13] = bad[13] | FLAG_LITERAL_ONLY_STREAM
-    bad = bad[:-1]
+    bad = payload[:-1]
     with pytest.raises(Exception):
-        decode_mode_stream(bytes(bad), cube)
+        decode_mode_stream(bad, cube)
